@@ -5,18 +5,19 @@ import com.aurora.service.RedisService;
 import com.aurora.service.TokenService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import jakarta.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -42,11 +43,11 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public String createToken(String subject) {
-        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
         SecretKey secretKey = generalKey();
-        return Jwts.builder().setId(getUuid()).setSubject(subject)
-                .setIssuer("huaweimian")
-                .signWith(signatureAlgorithm, secretKey).compact();
+        return Jwts.builder().id(getUuid()).subject(subject)
+                .issuer("huaweimian")
+                .signWith(secretKey, Jwts.SIG.HS256)
+                .compact();
     }
 
     @Override
@@ -69,7 +70,11 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public Claims parseToken(String token) {
         SecretKey secretKey = generalKey();
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     @Override
@@ -93,8 +98,13 @@ public class TokenServiceImpl implements TokenService {
     }
 
     public SecretKey generalKey() {
-        byte[] encodedKey = Base64.getDecoder().decode(secret);
-        return new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES");
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] encodedKey = digest.digest(secret.getBytes(StandardCharsets.UTF_8));
+            return Keys.hmacShaKeyFor(encodedKey);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
