@@ -80,7 +80,8 @@ upload:
   mode: ${UPLOAD_MODE:minio}
   minio:
     url: ${MINIO_URL:http://localhost:9000}
-    bucket: ${MINIO_BUCKET:aurora}
+    endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+    bucket-name: ${MINIO_BUCKET:aurora}
     access-key: ${MINIO_ACCESS_KEY:minioadmin}
     secret-key: ${MINIO_SECRET_KEY:minioadmin}
 

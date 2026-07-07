@@ -1,5 +1,8 @@
-spring:
+﻿spring:
   application:
     name: aurora-springboot
   profiles:
     active: dev
+  config:
+    # 本地覆盖配置（可选）：创建 application-dev-local.yml 即可自动生效
+    import: optional:classpath:application-dev-local.yml
