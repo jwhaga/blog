@@ -92,6 +92,8 @@ qq:
   check-url: https://graph.qq.com/user/get_user_info
 
 jwt:
+  # WARNING: Dev-only weak secret. DO NOT use in production.
+  # Use a 256-bit random key (e.g. openssl rand -base64 32) for production.
   secret: ${JWT_SECRET:aurora-dev-jwt-secret-key-change-in-production}
 
 search:

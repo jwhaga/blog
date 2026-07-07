@@ -20,10 +20,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        // CORS: allowedOriginPatterns("*") with allowCredentials(true) is acceptable for dev.
+        // For production, restrict to specific origins (e.g. https://yourdomain.com).
+        // Note: Spring 6.x does not allow allowCredentials(true) + allowedOrigins("*") simultaneously.
         registry.addMapping("/**")
                 .allowCredentials(true)
                 .allowedHeaders("*")
-                .allowedOrigins("*")
+                .allowedOriginPatterns("*")
                 .allowedMethods("*");
     }
 

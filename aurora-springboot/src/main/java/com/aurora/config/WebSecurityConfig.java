@@ -1,14 +1,11 @@
 package com.aurora.config;
 
 import com.aurora.filter.JwtAuthenticationTokenFilter;
-import com.aurora.handler.AccessDecisionManagerImpl;
-import com.aurora.handler.FilterInvocationSecurityMetadataSourceImpl;
+import com.aurora.handler.DynamicAuthorizationManagerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,8 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
-import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
-import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -43,15 +38,8 @@ public class WebSecurityConfig {
     @Autowired
     private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
 
-    @Bean
-    public FilterInvocationSecurityMetadataSource securityMetadataSource() {
-        return new FilterInvocationSecurityMetadataSourceImpl();
-    }
-
-    @Bean
-    public AccessDecisionManager accessDecisionManager() {
-        return new AccessDecisionManagerImpl();
-    }
+    @Autowired
+    private DynamicAuthorizationManagerImpl dynamicAuthorizationManager;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -69,16 +57,12 @@ public class WebSecurityConfig {
                 .loginProcessingUrl("/users/login")
                 .successHandler(authenticationSuccessHandler)
                 .failureHandler(authenticationFailureHandler));
-        http.authorizeRequests(auth -> auth
-                .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
-                    @Override
-                    public <O extends FilterSecurityInterceptor> O postProcess(O fsi) {
-                        fsi.setSecurityMetadataSource(securityMetadataSource());
-                        fsi.setAccessDecisionManager(accessDecisionManager());
-                        return fsi;
-                    }
-                })
-                .anyRequest().permitAll());
+        http.authorizeHttpRequests(auth -> auth
+                .anyRequest().access(dynamicAuthorizationManager));
+        // CSRF disabled: this is a stateless REST API using JWT Bearer tokens via Authorization header,
+        // not cookie-based sessions. CSRF protection is designed for browser-based session cookies
+        // where the browser auto-attaches credentials. Since we use SessionCreationPolicy.STATELESS
+        // and transmit JWT via explicit HTTP headers, CSRF attacks are not applicable.
         http.csrf(csrf -> csrf.disable());
         http.exceptionHandling(exception -> exception
                 .authenticationEntryPoint(authenticationEntryPoint)
