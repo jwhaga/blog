@@ -5,9 +5,9 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${MYSQL_URL:}
-    username: ${MYSQL_USERNAME:}
-    password: ${MYSQL_PASSWORD:}
+    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/aurora?serverTimezone=Asia/Shanghai&allowMultiQueries=true&useUnicode=true&characterEncoding=utf8&useSSL=false}
+    username: ${MYSQL_USERNAME:aurora}
+    password: ${MYSQL_PASSWORD:aurora123}
     hikari:
       minimum-idle: 10
       idle-timeout: 180000
@@ -23,9 +23,9 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST:}
+      host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
+      password: ${REDIS_PASSWORD:aurora123}
       database: 0
       lettuce:
         pool:
@@ -35,10 +35,10 @@ spring:
           max-wait: 10000
 
   rabbitmq:
-    host: ${RABBITMQ_HOST:}
+    host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USERNAME:}
-    password: ${RABBITMQ_PASSWORD:}
+    username: ${RABBITMQ_USERNAME:aurora}
+    password: ${RABBITMQ_PASSWORD:aurora123}
     listener:
       simple:
         retry:
@@ -47,7 +47,7 @@ spring:
           initial-interval: 3000
 
   elasticsearch:
-    uris: ${ES_URIS:}
+    uris: ${ES_URIS:http://localhost:9201}
     username: ${ES_USERNAME:}
     password: ${ES_PASSWORD:}
 
@@ -68,13 +68,7 @@ spring:
           ssl:
             enable: true
           starttls:
-            enable: true
-            required: true
-
-  servlet:
-    multipart:
-      max-file-size: 100MB
-      max-request-size: 100MB
+            enable: false
 
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
@@ -82,31 +76,27 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
 
-jwt:
-  secret: ${JWT_SECRET:}
-
-search:
-  mode: ${SEARCH_MODE:elasticsearch}
-
 upload:
-  mode: ${UPLOAD_MODE:oss}
-  oss:
-    url: ${OSS_URL:}
-    endpoint: ${OSS_ENDPOINT:}
-    accessKeyId: ${OSS_ACCESS_KEY_ID:}
-    accessKeySecret: ${OSS_ACCESS_KEY_SECRET:}
-    bucketName: ${OSS_BUCKET_NAME:}
+  mode: ${UPLOAD_MODE:minio}
   minio:
-    url: ${MINIO_URL:}
-    endpoint: ${MINIO_ENDPOINT:}
-    accesskey: ${MINIO_ACCESS_KEY:}
-    secretKey: ${MINIO_SECRET_KEY:}
-    bucketName: ${MINIO_BUCKET:}
+    url: ${MINIO_URL:http://localhost:9000}
+    bucket: ${MINIO_BUCKET:aurora}
+    access-key: ${MINIO_ACCESS_KEY:minioadmin}
+    secret-key: ${MINIO_SECRET_KEY:minioadmin}
 
 website:
-  url: ${WEBSITE_URL:}
+  url: ${WEBSITE_URL:http://localhost:8080}
 
 qq:
   app-id: ${QQ_APP_ID:}
-  check-token-url: https://graph.qq.com/oauth2.0/me?access_token={access_token}
-  user-info-url: https://graph.qq.com/user/get_user_info?openid={openid}&access_token={access_token}&oauth_consumer_key={oauth_consumer_key}
+  check-url: https://graph.qq.com/user/get_user_info
+
+jwt:
+  secret: ${JWT_SECRET:aurora-dev-jwt-secret-key-change-in-production}
+
+search:
+  mode: ${SEARCH_MODE:mysql}
+
+rabbitmq:
+  address: ${RABBITMQ_HOST:localhost}
+  port: ${RABBITMQ_PORT:5672}
