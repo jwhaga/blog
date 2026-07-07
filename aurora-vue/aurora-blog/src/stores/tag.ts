@@ -1,5 +1,6 @@
+﻿import { defineStore } from 'pinia'
+import api from '@/api/api'
 import type { Tag } from '@/types/blog'
-import { defineStore } from 'pinia'
 
 export const useTagStore = defineStore('tagStore', {
   state: () => {
@@ -8,5 +9,14 @@ export const useTagStore = defineStore('tagStore', {
       tags: [] as Tag[]
     }
   },
-  actions: {}
+  actions: {
+    async fetchTags() {
+      const resp = await api.getAllTags()
+      this.tags = resp.data.data ?? []
+    },
+    async fetchTopTenTags() {
+      const resp = await api.getTopTenTags()
+      this.homeTags = resp.data.data ?? []
+    }
+  }
 })

@@ -1,11 +1,17 @@
+﻿import { defineStore } from 'pinia'
+import api from '@/api/api'
 import type { Category } from '@/types/blog'
-import { defineStore } from 'pinia'
 
 export const useCategoryStore = defineStore('categoryStore', {
   state: () => {
     return {
-        categories: [] as Category[]
+      categories: [] as Category[]
     }
   },
-  actions: {}
+  actions: {
+    async fetchCategories() {
+      const resp = await api.getAllCategories()
+      this.categories = resp.data.data ?? []
+    }
+  }
 })
