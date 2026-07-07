@@ -1,113 +1,113 @@
-import axios from 'axios'
+import request from '@/utils/request'
 
 export default {
   getTopAndFeaturedArticles: () => {
-    return axios.get('/api/articles/topAndFeatured')
+    return request.get('/api/articles/topAndFeatured')
   },
   getArticles: (params: any) => {
-    return axios.get('/api/articles/all', { params: params })
+    return request.get('/api/articles/all', { params: params })
   },
   getArticlesByCategoryId: (params: any) => {
-    return axios.get('/api/articles/categoryId', { params: params })
+    return request.get('/api/articles/categoryId', { params: params })
   },
   getArticeById: (articleId: any) => {
-    return axios.get('/api/articles/' + articleId)
+    return request.get('/api/articles/' + articleId)
   },
   getAllCategories: () => {
-    return axios.get('/api/categories/all')
+    return request.get('/api/categories/all')
   },
   getAllTags: () => {
-    return axios.get('/api/tags/all')
+    return request.get('/api/tags/all')
   },
   getTopTenTags: () => {
-    return axios.get('/api/tags/topTen')
+    return request.get('/api/tags/topTen')
   },
   getArticlesByTagId: (params: any) => {
-    return axios.get('/api/articles/tagId', { params: params })
+    return request.get('/api/articles/tagId', { params: params })
   },
   getAllArchives: (params: any) => {
-    return axios.get('/api/archives/all', { params: params })
+    return request.get('/api/archives/all', { params: params })
   },
   login: (params: any) => {
-    return axios.post('/api/users/login', params)
+    return request.post('/api/users/login', params)
   },
   saveComment: (params: any) => {
-    return axios.post('/api/comments/save', params)
+    return request.post('/api/comments/save', params)
   },
   getComments: (params: any) => {
-    return axios.get('/api/comments', { params: params })
+    return request.get('/api/comments', { params: params })
   },
   getTopSixComments: () => {
-    return axios.get('/api/comments/topSix')
+    return request.get('/api/comments/topSix')
   },
   getAbout: () => {
-    return axios.get('/api/about')
+    return request.get('/api/about')
   },
   getFriendLink: () => {
-    return axios.get('/api/links')
+    return request.get('/api/links')
   },
   submitUserInfo: (params: any) => {
-    return axios.put('/api/users/info', params)
+    return request.put('/api/users/info', params)
   },
   getUserInfoById: (id: any) => {
-    return axios.get('/api/users/info/' + id)
+    return request.get('/api/users/info/' + id)
   },
   updateUserSubscribe: (params: any) => {
-    return axios.put('/api/users/subscribe', params)
+    return request.put('/api/users/subscribe', params)
   },
   sendValidationCode: (username: any) => {
-    return axios.get('/api/users/code', {
+    return request.get('/api/users/code', {
       params: {
         username: username
       }
     })
   },
   bindingEmail: (params: any) => {
-    return axios.put('/api/users/email', params)
+    return request.put('/api/users/email', params)
   },
   register: (params: any) => {
-    return axios.post('/api/users/register', params)
+    return request.post('/api/users/register', params)
   },
   searchArticles: (params: any) => {
-    return axios.get('/api/articles/search', {
+    return request.get('/api/articles/search', {
       params: params
     })
   },
   getAlbums: () => {
-    return axios.get('/api/photos/albums')
+    return request.get('/api/photos/albums')
   },
   getPhotosBuAlbumId: (albumId: any, params: any) => {
-    return axios.get('/api/albums/' + albumId + '/photos', {
+    return request.get('/api/albums/' + albumId + '/photos', {
       params: params
     })
   },
   getWebsiteConfig: () => {
-    return axios.get('/api')
+    return request.get('/api')
   },
   qqLogin: (params: any) => {
-    return axios.post('/api/users/oauth/qq', params)
+    return request.post('/api/users/oauth/qq', params)
   },
   report: () => {
-    axios.post('/api/report')
+    request.post('/api/report')
   },
   getTalks: (params: any) => {
-    return axios.get('/api/talks', {
+    return request.get('/api/talks', {
       params: params
     })
   },
   getTalkById: (id: any) => {
-    return axios.get('/api/talks/' + id)
+    return request.get('/api/talks/' + id)
   },
   logout: () => {
-    return axios.post('/api/users/logout')
+    return request.post('/api/users/logout')
   },
   getRepliesByCommentId: (commentId: any) => {
-    return axios.get(`/api/comments/${commentId}/replies`)
+    return request.get(`/api/comments/${commentId}/replies`)
   },
   updatePassword: (params: any) => {
-    return axios.put('/api/users/password', params)
+    return request.put('/api/users/password', params)
   },
   accessArticle: (params: any) => {
-    return axios.post('/api/articles/access', params)
+    return request.post('/api/articles/access', params)
   }
 }
