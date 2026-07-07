@@ -52,7 +52,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, toRefs, toRef } from 'vue'
+
 import { useAppStore } from '@/stores/app'
 
 export default defineComponent({

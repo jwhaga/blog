@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, toRefs, provide } from 'vue'
+
 import Avatar from '@/components/Avatar.vue'
 import CommentReplyItem from './CommentReplyItem.vue'
 import CommentReplyForm from './CommentReplyForm.vue'

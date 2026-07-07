@@ -5,7 +5,9 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "deploy": "node deploy.js"
+    "deploy": "node deploy.js",
+  "lint": "eslint --ext .ts,.vue src/",
+  "lint:fix": "eslint --ext .ts,.vue src/ --fix"
   },
   "dependencies": {
     "@agoose77/markdown-it-mermaid": "^1.1.0",
@@ -47,6 +49,8 @@
     "@tailwindcss/postcss7-compat": "npm:@tailwindcss/postcss7-compat@2.1.2",
     "@types/nprogress": "^0.2.0",
     "@types/prismjs": "^1.26.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-plugin-typescript": "~5.0.0",
@@ -54,6 +58,10 @@
     "autoprefixer": "^8.0.0",
     "babel-plugin-import": "^1.13.5",
     "babel-plugin-prismjs": "^2.1.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.2",
+    "eslint-plugin-prettier": "^5.5.6",
+    "eslint-plugin-vue": "^9.33.0",
     "postcss": "^7.0.35",
     "sass-loader": "^10.1.1",
     "svg-sprite-loader": "^6.0.11",
