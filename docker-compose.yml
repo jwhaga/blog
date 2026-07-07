@@ -1,0 +1,91 @@
+﻿name: aurora
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: aurora-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: aurora
+      MYSQL_USER: aurora
+      MYSQL_PASSWORD: aurora123
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./aurora-springboot/sql/aurora.sql:/docker-entrypoint-initdb.d/aurora.sql
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aurora-net
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: aurora-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass aurora123
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aurora-net
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: aurora-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: aurora
+      RABBITMQ_DEFAULT_PASS: aurora123
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - aurora-net
+
+  elasticsearch:
+    build:
+      context: .
+      dockerfile: Dockerfile.es
+    container_name: aurora-es
+    restart: unless-stopped
+    ports:
+      - "9201:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    networks:
+      - aurora-net
+
+volumes:
+  mysql_data:
+  redis_data:
+  es_data:
+
+networks:
+  aurora-net:
+    driver: bridge
