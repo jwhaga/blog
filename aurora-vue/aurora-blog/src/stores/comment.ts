@@ -1,10 +1,11 @@
+import type { Comment } from '@/types/blog'
 import { defineStore } from 'pinia'
 
 export const useCommentStore = defineStore('commentStore', {
   state: () => {
     return {
-      recentComment: '' as any,
-      type: '' as any
+      recentComment: null as Comment | null,
+      type: '' as string
     }
   },
   actions: {}

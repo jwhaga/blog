@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import type { WebsiteConfig } from '@/types/blog'
 import { i18n } from '@/locales/index'
 import cookies from 'js-cookie'
 import nProgress from 'nprogress'
@@ -42,7 +43,7 @@ export const useAppStore = defineStore('appStore', {
         }
       },
       appLoading: false,
-      websiteConfig: '' as any,
+      websiteConfig: null as WebsiteConfig | null,
       viewCount: 0,
       articleCount: 0,
       talkCount: 0,

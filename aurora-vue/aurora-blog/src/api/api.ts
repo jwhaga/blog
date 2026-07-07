@@ -1,16 +1,17 @@
 import request from '@/utils/request'
+import type { PageParams, LoginParams, RegisterParams, CommentParams, PasswordParams, AccessArticleParams, QQLoginParams } from '@/types/blog'
 
 export default {
   getTopAndFeaturedArticles: () => {
     return request.get('/api/articles/topAndFeatured')
   },
-  getArticles: (params: any) => {
+  getArticles: (params: PageParams) => {
     return request.get('/api/articles/all', { params: params })
   },
-  getArticlesByCategoryId: (params: any) => {
+  getArticlesByCategoryId: (params: PageParams) => {
     return request.get('/api/articles/categoryId', { params: params })
   },
-  getArticeById: (articleId: any) => {
+  getArticeById: (articleId: number) => {
     return request.get('/api/articles/' + articleId)
   },
   getAllCategories: () => {
@@ -22,19 +23,19 @@ export default {
   getTopTenTags: () => {
     return request.get('/api/tags/topTen')
   },
-  getArticlesByTagId: (params: any) => {
+  getArticlesByTagId: (params: PageParams) => {
     return request.get('/api/articles/tagId', { params: params })
   },
-  getAllArchives: (params: any) => {
+  getAllArchives: (params: PageParams) => {
     return request.get('/api/archives/all', { params: params })
   },
-  login: (params: any) => {
+  login: (params: LoginParams) => {
     return request.post('/api/users/login', params)
   },
-  saveComment: (params: any) => {
+  saveComment: (params: CommentParams) => {
     return request.post('/api/comments/save', params)
   },
-  getComments: (params: any) => {
+  getComments: (params: PageParams) => {
     return request.get('/api/comments', { params: params })
   },
   getTopSixComments: () => {
@@ -46,29 +47,29 @@ export default {
   getFriendLink: () => {
     return request.get('/api/links')
   },
-  submitUserInfo: (params: any) => {
+  submitUserInfo: (params: Record<string, unknown>) => {
     return request.put('/api/users/info', params)
   },
-  getUserInfoById: (id: any) => {
+  getUserInfoById: (id: number) => {
     return request.get('/api/users/info/' + id)
   },
-  updateUserSubscribe: (params: any) => {
+  updateUserSubscribe: (params: Record<string, unknown>) => {
     return request.put('/api/users/subscribe', params)
   },
-  sendValidationCode: (username: any) => {
+  sendValidationCode: (username: string) => {
     return request.get('/api/users/code', {
       params: {
         username: username
       }
     })
   },
-  bindingEmail: (params: any) => {
+  bindingEmail: (params: Record<string, unknown>) => {
     return request.put('/api/users/email', params)
   },
-  register: (params: any) => {
+  register: (params: RegisterParams) => {
     return request.post('/api/users/register', params)
   },
-  searchArticles: (params: any) => {
+  searchArticles: (params: Record<string, unknown>) => {
     return request.get('/api/articles/search', {
       params: params
     })
@@ -76,7 +77,7 @@ export default {
   getAlbums: () => {
     return request.get('/api/photos/albums')
   },
-  getPhotosBuAlbumId: (albumId: any, params: any) => {
+  getPhotosBuAlbumId: (albumId: number, params: PageParams) => {
     return request.get('/api/albums/' + albumId + '/photos', {
       params: params
     })
@@ -84,30 +85,30 @@ export default {
   getWebsiteConfig: () => {
     return request.get('/api')
   },
-  qqLogin: (params: any) => {
+  qqlogin: (params: LoginParams) => {
     return request.post('/api/users/oauth/qq', params)
   },
   report: () => {
     request.post('/api/report')
   },
-  getTalks: (params: any) => {
+  getTalks: (params: PageParams) => {
     return request.get('/api/talks', {
       params: params
     })
   },
-  getTalkById: (id: any) => {
+  getTalkById: (id: number) => {
     return request.get('/api/talks/' + id)
   },
   logout: () => {
     return request.post('/api/users/logout')
   },
-  getRepliesByCommentId: (commentId: any) => {
+  getRepliesByCommentId: (commentId: number) => {
     return request.get(`/api/comments/${commentId}/replies`)
   },
-  updatePassword: (params: any) => {
+  updatePassword: (params: PasswordParams) => {
     return request.put('/api/users/password', params)
   },
-  accessArticle: (params: any) => {
+  accessArticle: (params: AccessArticleParams) => {
     return request.post('/api/articles/access', params)
   }
 }
