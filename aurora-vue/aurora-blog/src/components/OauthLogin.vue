@@ -31,7 +31,8 @@ export default defineComponent({
             openId: openId,
             accessToken: accessToken
           }
-          api.qqLogin(params).then(({ data }) => {
+          api.qqlogin(params as any).then((resp: any) => {
+      const data = resp.data
             if (data.flag) {
               userStore.userInfo = data.data
               userStore.token = data.data.token

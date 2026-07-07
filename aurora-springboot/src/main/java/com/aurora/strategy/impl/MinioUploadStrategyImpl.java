@@ -4,10 +4,10 @@ import com.aurora.config.properties.MinioProperties;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.StatObjectArgs;
-import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 @Service("minioUploadStrategyImpl")
@@ -28,13 +28,16 @@ public class MinioUploadStrategyImpl extends AbstractUploadStrategyImpl {
         return exist;
     }
 
-    @SneakyThrows
     @Override
-    public void upload(String path, String fileName, InputStream inputStream) {
-        getMinioClient().putObject(
-                PutObjectArgs.builder().bucket(minioProperties.getBucketName()).object(path + fileName).stream(
-                                inputStream, inputStream.available(), -1)
-                        .build());
+    public void upload(String path, String fileName, InputStream inputStream) throws IOException {
+        try {
+            getMinioClient().putObject(
+                    PutObjectArgs.builder().bucket(minioProperties.getBucketName()).object(path + fileName).stream(
+                                    inputStream, inputStream.available(), -1)
+                            .build());
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
     }
 
     @Override

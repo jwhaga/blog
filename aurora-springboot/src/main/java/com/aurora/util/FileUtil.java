@@ -1,7 +1,7 @@
 package com.aurora.util;
 
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -9,7 +9,7 @@ import java.io.*;
 import java.security.MessageDigest;
 import java.util.Objects;
 
-@Log4j2
+@Slf4j
 public class FileUtil {
 
     public static String getMd5(InputStream inputStream) {
@@ -22,7 +22,7 @@ public class FileUtil {
             }
             return new String(Hex.encodeHex(md5.digest()));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("计算文件 MD5 失败", e);
             return null;
         } finally {
             try {
@@ -30,7 +30,7 @@ public class FileUtil {
                     inputStream.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("关闭文件输入流失败", e);
             }
         }
     }
@@ -51,7 +51,7 @@ public class FileUtil {
             multipartFile.transferTo(file);
             file.deleteOnExit();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("MultipartFile 转临时文件失败", e);
         }
         return file;
     }

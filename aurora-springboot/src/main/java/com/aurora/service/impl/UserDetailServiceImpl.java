@@ -12,7 +12,6 @@ import com.aurora.util.IpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import eu.bitwalker.useragentutils.UserAgent;
-import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -40,7 +39,6 @@ public class UserDetailServiceImpl implements UserDetailsService {
     @Resource
     private HttpServletRequest request;
 
-    @SneakyThrows
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         if (StringUtils.isBlank(username)) {

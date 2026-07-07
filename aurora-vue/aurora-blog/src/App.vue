@@ -154,7 +154,7 @@ export default defineComponent({
       }
     }
     return {
-      title: computed(() => appStore.websiteConfig.websiteTitle || metaStore.title),
+      title: computed(() => appStore.websiteConfig!.websiteTitle || metaStore.title),
       theme: computed(() => appStore.themeConfig.theme),
       headerImage: computed(() => {
         return {

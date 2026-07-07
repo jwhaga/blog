@@ -109,7 +109,7 @@ export default defineComponent({
       v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(index) })
     }
     const fetchTalk = () => {
-      api.getTalkById(route.params.talkId).then(({ data }) => {
+      api.getTalkById(Number(route.params.talkId)).then(({ data }) => {
         if (data.data === null) {
           router.push({ path: '/出错啦' })
           return

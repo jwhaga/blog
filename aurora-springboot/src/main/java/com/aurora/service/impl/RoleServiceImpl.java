@@ -21,7 +21,6 @@ import com.aurora.model.dto.PageResultDTO;
 import com.aurora.model.vo.RoleVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,14 +56,13 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         return BeanCopyUtil.copyList(roleList, UserRoleDTO.class);
     }
 
-    @SneakyThrows
     @Override
     public PageResultDTO<RoleDTO> listRoles(ConditionVO conditionVO) {
         LambdaQueryWrapper<Role> queryWrapper = new LambdaQueryWrapper<Role>()
                 .like(StringUtils.isNotBlank(conditionVO.getKeywords()), Role::getRoleName, conditionVO.getKeywords());
-        CompletableFuture<Integer> asyncCount = CompletableFuture.supplyAsync(() -> roleMapper.selectCount(queryWrapper));
+        CompletableFuture<Long> asyncCount = CompletableFuture.supplyAsync(() -> roleMapper.selectCount(queryWrapper));
         List<RoleDTO> roleDTOs = roleMapper.listRoles(PageUtil.getLimitCurrent(), PageUtil.getSize(), conditionVO);
-        return new PageResultDTO<>(roleDTOs, asyncCount.get());
+        return new PageResultDTO<>(roleDTOs, asyncCount.join());
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -112,7 +110,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     @Override
     public void deleteRoles(List<Integer> roleIdList) {
-        Integer count = userRoleMapper.selectCount(new LambdaQueryWrapper<UserRole>()
+        Long count = userRoleMapper.selectCount(new LambdaQueryWrapper<UserRole>()
                 .in(UserRole::getRoleId, roleIdList));
         if (count > 0) {
             throw new BizException("该角色下存在用户");

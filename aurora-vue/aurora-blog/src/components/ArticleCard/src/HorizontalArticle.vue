@@ -103,22 +103,22 @@ export default defineComponent({
     const toArticle = () => {
       let isAccess = false
       userStore.accessArticles.forEach((item: any) => {
-        if (item == articleStore.topArticle.id) {
+        if (item == articleStore.topArticle!.id) {
           isAccess = true
         }
       })
-      if (articleStore.topArticle.status == 2 && isAccess == false) {
-        if (userStore.userInfo === '') {
+      if (articleStore.topArticle!.status == 2 && isAccess == false) {
+        if (userStore.userInfo === null) {
           proxy.$notify({
             title: 'Warning',
             message: '该文章受密码保护,请登录后访问',
             type: 'warning'
           })
         } else {
-          emitter.emit('changeArticlePasswordDialogVisible', articleStore.topArticle.id)
+          emitter.emit('changeArticlePasswordDialogVisible', articleStore.topArticle!.id)
         }
       } else {
-        router.push({ path: '/articles/' + articleStore.topArticle.id })
+        router.push({ path: '/articles/' + articleStore.topArticle!.id })
       }
     }
     return {

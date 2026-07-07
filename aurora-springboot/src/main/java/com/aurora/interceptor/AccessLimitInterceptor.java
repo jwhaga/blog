@@ -6,7 +6,7 @@ import com.aurora.annotation.AccessLimit;
 import com.aurora.model.vo.ResultVO;
 import com.aurora.service.RedisService;
 import com.aurora.util.IpUtil;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 
 import static com.aurora.constant.CommonConstant.APPLICATION_JSON;
 
-@Log4j2
+@Slf4j
 @Component
 @SuppressWarnings("all")
 public class AccessLimitInterceptor implements HandlerInterceptor {

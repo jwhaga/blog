@@ -13,13 +13,13 @@ import java.util.List;
 @AllArgsConstructor
 public class AuroraAdminInfoDTO {
 
-    private Integer viewsCount;
+    private Long viewsCount;
 
-    private Integer messageCount;
+    private Long messageCount;
 
-    private Integer userCount;
+    private Long userCount;
 
-    private Integer articleCount;
+    private Long articleCount;
 
     private List<CategoryDTO> categoryDTOs;
 

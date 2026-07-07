@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.aurora.model.dto.ArticleSearchDTO;
 import com.aurora.model.dto.UserAreaDTO;
 import com.aurora.entity.*;
-import com.aurora.mapper.ElasticsearchMapper;
+import com.aurora.repository.ElasticsearchMapper;
 import com.aurora.mapper.UniqueViewMapper;
 import com.aurora.mapper.UserAuthMapper;
 import com.aurora.service.*;

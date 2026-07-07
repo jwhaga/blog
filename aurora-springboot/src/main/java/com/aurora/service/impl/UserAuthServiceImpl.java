@@ -23,7 +23,6 @@ import com.aurora.model.vo.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
-import lombok.SneakyThrows;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -172,7 +171,7 @@ public class UserAuthServiceImpl implements UserAuthService {
 
     @Override
     public PageResultDTO<UserAdminDTO> listUsers(ConditionVO conditionVO) {
-        Integer count = userAuthMapper.countUser(conditionVO);
+        Long count = userAuthMapper.countUser(conditionVO);
         if (count == 0) {
             return new PageResultDTO<>();
         }
@@ -180,7 +179,6 @@ public class UserAuthServiceImpl implements UserAuthService {
         return new PageResultDTO<>(UserAdminDTOs, count);
     }
 
-    @SneakyThrows
     @Override
     public UserLogoutStatusDTO logout() {
         tokenService.delLoginUser(UserUtil.getUserDetailsDTO().getId());

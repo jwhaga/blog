@@ -13,6 +13,10 @@ public enum StatusCodeEnum {
 
     AUTHORIZED(40300, "没有操作权限"),
 
+    NOT_FOUND(40400, "资源不存在"),
+
+    METHOD_NOT_ALLOWED(40500, "请求方法不支持"),
+
     SYSTEM_ERROR(50000, "系统异常"),
 
     FAIL(51000, "操作失败"),

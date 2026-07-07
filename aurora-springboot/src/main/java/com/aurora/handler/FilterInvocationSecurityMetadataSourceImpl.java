@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.List;
 
@@ -39,8 +40,15 @@ public class FilterInvocationSecurityMetadataSourceImpl implements FilterInvocat
             this.loadResourceRoleList();
         }
         FilterInvocation fi = (FilterInvocation) object;
-        String method = fi.getRequest().getMethod();
-        String url = fi.getRequest().getRequestURI();
+        return getAttributes(fi.getRequest());
+    }
+
+    public Collection<ConfigAttribute> getAttributes(HttpServletRequest request) {
+        if (CollectionUtils.isEmpty(resourceRoleList)) {
+            this.loadResourceRoleList();
+        }
+        String method = request.getMethod();
+        String url = request.getRequestURI();
         AntPathMatcher antPathMatcher = new AntPathMatcher();
         for (ResourceRoleDTO resourceRoleDTO : resourceRoleList) {
             if (antPathMatcher.match(resourceRoleDTO.getUrl(), url) && resourceRoleDTO.getRequestMethod().equals(method)) {

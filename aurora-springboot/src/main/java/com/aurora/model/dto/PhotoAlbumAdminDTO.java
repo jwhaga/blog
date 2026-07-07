@@ -19,7 +19,7 @@ public class PhotoAlbumAdminDTO {
 
     private String albumCover;
 
-    private Integer photoCount;
+    private Long photoCount;
 
     private Integer status;
 

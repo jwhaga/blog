@@ -49,7 +49,7 @@ public class PhotoServiceImpl extends ServiceImpl<PhotoMapper, Photo> implements
                 .orderByDesc(Photo::getId)
                 .orderByDesc(Photo::getUpdateTime));
         List<PhotoAdminDTO> photos = BeanCopyUtil.copyList(photoPage.getRecords(), PhotoAdminDTO.class);
-        return new PageResultDTO<>(photos, (int) photoPage.getTotal());
+        return new PageResultDTO<>(photos, photoPage.getTotal());
     }
 
     @Transactional(rollbackFor = Exception.class)

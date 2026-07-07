@@ -29,7 +29,9 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang='ts'>
+import { defineComponent, reactive, toRefs, provide } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 import Avatar from '@/components/Avatar.vue'
 import CommentReplyItem from './CommentReplyItem.vue'

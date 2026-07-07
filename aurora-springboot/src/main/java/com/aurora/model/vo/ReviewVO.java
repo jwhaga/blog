@@ -1,7 +1,6 @@
 package com.aurora.model.vo;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,15 +13,15 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ApiModel(description = "审核")
+@Schema(description = "审核")
 public class ReviewVO {
 
     @NotNull(message = "id不能为空")
-    @ApiModelProperty(name = "idList", value = "id列表", required = true, dataType = "List<Integer>")
+    @Schema(name = "idList", description = "id列表", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<Integer> ids;
 
     @NotNull(message = "状态值不能为空")
-    @ApiModelProperty(name = "isDelete", value = "删除状态", required = true, dataType = "Integer")
+    @Schema(name = "isDelete", description = "删除状态", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer isReview;
 
 }

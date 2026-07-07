@@ -1,7 +1,6 @@
 package com.aurora.model.vo;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,18 +13,18 @@ import jakarta.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ApiModel(description = "照片信息")
+@Schema(description = "照片信息")
 public class PhotoInfoVO {
 
     @NotNull(message = "照片id不能为空")
-    @ApiModelProperty(name = "id", value = "照片id", required = true, dataType = "Integer")
+    @Schema(description = "照片id", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer id;
 
     @NotBlank(message = "照片名不能为空")
-    @ApiModelProperty(name = "photoName", value = "照片名", required = true, dataType = "String")
+    @Schema(description = "照片名", requiredMode = Schema.RequiredMode.REQUIRED)
     private String photoName;
 
-    @ApiModelProperty(name = "photoDesc", value = "照片描述", dataType = "String")
+    @Schema(description = "照片描述")
     private String photoDesc;
 
 }

@@ -73,7 +73,7 @@
         ORDER BY c.id DESC
         LIMIT 0 , 6
     </select>
-    <select id="countComments" resultType="java.lang.Integer">
+    <select id="countComments" resultType="java.lang.Long">
         SELECT
         count(1)
         from

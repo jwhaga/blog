@@ -17,7 +17,6 @@ import com.aurora.model.dto.PageResultDTO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,10 +37,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         return categoryMapper.listCategories();
     }
 
-    @SneakyThrows
     @Override
     public PageResultDTO<CategoryAdminDTO> listCategoriesAdmin(ConditionVO conditionVO) {
-        Integer count = categoryMapper.selectCount(new LambdaQueryWrapper<Category>()
+        Long count = categoryMapper.selectCount(new LambdaQueryWrapper<Category>()
                 .like(StringUtils.isNotBlank(conditionVO.getKeywords()), Category::getCategoryName, conditionVO.getKeywords()));
         if (count == 0) {
             return new PageResultDTO<>();
@@ -50,7 +48,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         return new PageResultDTO<>(categoryList, count);
     }
 
-    @SneakyThrows
     @Override
     public List<CategoryOptionDTO> listCategoriesBySearch(ConditionVO conditionVO) {
         List<Category> categoryList = categoryMapper.selectList(new LambdaQueryWrapper<Category>()
@@ -62,7 +59,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     @Override
     public void deleteCategories(List<Integer> categoryIds) {
-        Integer count = articleMapper.selectCount(new LambdaQueryWrapper<Article>()
+        Long count = articleMapper.selectCount(new LambdaQueryWrapper<Article>()
                 .in(Article::getCategoryId, categoryIds));
         if (count > 0) {
             throw new BizException("删除失败，该分类下存在文章");

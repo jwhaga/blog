@@ -3,11 +3,13 @@ package com.aurora.strategy.impl;
 import com.aurora.exception.BizException;
 import com.aurora.strategy.UploadStrategy;
 import com.aurora.util.FileUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 
+@Slf4j
 @Service
 public abstract class AbstractUploadStrategyImpl implements UploadStrategy {
 
@@ -22,7 +24,7 @@ public abstract class AbstractUploadStrategyImpl implements UploadStrategy {
             }
             return getFileAccessUrl(path + fileName);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("文件上传失败", e);
             throw new BizException("文件上传失败");
         }
     }
@@ -33,7 +35,7 @@ public abstract class AbstractUploadStrategyImpl implements UploadStrategy {
             upload(path, fileName, inputStream);
             return getFileAccessUrl(path + fileName);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("文件上传失败", e);
             throw new BizException("文件上传失败");
         }
     }

@@ -184,7 +184,7 @@ export default defineComponent({
       let params = new URLSearchParams()
       params.append('username', loginInfo.username)
       params.append('password', loginInfo.password)
-      api.login(params).then(({ data }) => {
+      api.login(params as any).then(({ data }) => {
         if (data.flag) {
           userStore.userInfo = data.data
           sessionStorage.setItem('token', data.data.token)
@@ -201,8 +201,8 @@ export default defineComponent({
     const logout = () => {
       api.logout().then(({ data }) => {
         if (data.flag) {
-          userStore.userInfo = ''
-          userStore.token = ''
+          userStore.userInfo = null
+          userStore.token = ""
           userStore.accessArticles = []
           sessionStorage.removeItem('token')
           proxy.$notify({
@@ -310,13 +310,13 @@ export default defineComponent({
       }
       api
         .accessArticle({
-          articleId: reactiveDate.articleId,
-          articlePassword: reactiveDate.articlePassword
+          articleId: reactiveDate.articleId as any,
+          password: reactiveDate.articlePassword
         })
         .then(({ data }) => {
           if (data.flag) {
             reactiveDate.articlePasswordDialogVisible = false
-            userStore.accessArticles.push(reactiveDate.articleId)
+            userStore.accessArticles.push(reactiveDate.articleId as any)
             router.push({ path: '/articles/' + reactiveDate.articleId })
           }
         })

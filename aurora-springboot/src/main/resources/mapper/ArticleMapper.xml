@@ -415,7 +415,7 @@
         ORDER BY create_time DESC
         LIMIT #{current}, #{size}
     </select>
-    <select id="countArticleAdmins" resultType="java.lang.Integer">
+    <select id="countArticleAdmins" resultType="java.lang.Long">
         SELECT
         count(DISTINCT a.id)
         from

@@ -26,7 +26,7 @@ import com.aurora.model.vo.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -45,6 +45,7 @@ import static com.aurora.constant.RedisConstant.*;
 import static com.aurora.enums.ArticleStatusEnum.*;
 import static com.aurora.enums.StatusCodeEnum.ARTICLE_ACCESS_FAIL;
 
+@Slf4j
 @Service
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> implements ArticleService {
 
@@ -78,7 +79,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Autowired
     private SearchStrategyContext searchStrategyContext;
 
-    @SneakyThrows
     @Override
     public TopAndFeaturedArticlesDTO listTopAndFeaturedArticles() {
         List<ArticleCardDTO> articleCardDTOs = articleMapper.listTopAndFeaturedArticles();
@@ -94,27 +94,24 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         return topAndFeaturedArticlesDTO;
     }
 
-    @SneakyThrows
     @Override
     public PageResultDTO<ArticleCardDTO> listArticles() {
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<Article>()
                 .eq(Article::getIsDelete, 0)
                 .in(Article::getStatus, 1, 2);
-        CompletableFuture<Integer> asyncCount = CompletableFuture.supplyAsync(() -> articleMapper.selectCount(queryWrapper));
+        CompletableFuture<Long> asyncCount = CompletableFuture.supplyAsync(() -> articleMapper.selectCount(queryWrapper));
         List<ArticleCardDTO> articles = articleMapper.listArticles(PageUtil.getLimitCurrent(), PageUtil.getSize());
-        return new PageResultDTO<>(articles, asyncCount.get());
+        return new PageResultDTO<>(articles, asyncCount.join());
     }
 
-    @SneakyThrows
     @Override
     public PageResultDTO<ArticleCardDTO> listArticlesByCategoryId(Integer categoryId) {
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<Article>().eq(Article::getCategoryId, categoryId);
-        CompletableFuture<Integer> asyncCount = CompletableFuture.supplyAsync(() -> articleMapper.selectCount(queryWrapper));
+        CompletableFuture<Long> asyncCount = CompletableFuture.supplyAsync(() -> articleMapper.selectCount(queryWrapper));
         List<ArticleCardDTO> articles = articleMapper.getArticlesByCategoryId(PageUtil.getLimitCurrent(), PageUtil.getSize(), categoryId);
-        return new PageResultDTO<>(articles, asyncCount.get());
+        return new PageResultDTO<>(articles, asyncCount.join());
     }
 
-    @SneakyThrows
     @Override
     public ArticleDTO getArticleById(Integer articleId) {
         Article articleForCheck = articleMapper.selectOne(new LambdaQueryWrapper<Article>().eq(Article::getId, articleId));
@@ -148,7 +145,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             }
             return nextArticle;
         });
-        ArticleDTO article = asyncArticle.get();
+        ArticleDTO article = asyncArticle.join();
         if (Objects.isNull(article)) {
             return null;
         }
@@ -156,8 +153,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         if (Objects.nonNull(score)) {
             article.setViewCount(score.intValue());
         }
-        article.setPreArticleCard(asyncPreArticle.get());
-        article.setNextArticleCard(asyncNextArticle.get());
+        article.setPreArticleCard(asyncPreArticle.join());
+        article.setNextArticleCard(asyncNextArticle.join());
         return article;
     }
 
@@ -174,20 +171,18 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         }
     }
 
-    @SneakyThrows
     @Override
     public PageResultDTO<ArticleCardDTO> listArticlesByTagId(Integer tagId) {
         LambdaQueryWrapper<ArticleTag> queryWrapper = new LambdaQueryWrapper<ArticleTag>().eq(ArticleTag::getTagId, tagId);
-        CompletableFuture<Integer> asyncCount = CompletableFuture.supplyAsync(() -> articleTagMapper.selectCount(queryWrapper));
+        CompletableFuture<Long> asyncCount = CompletableFuture.supplyAsync(() -> articleTagMapper.selectCount(queryWrapper));
         List<ArticleCardDTO> articles = articleMapper.listArticlesByTagId(PageUtil.getLimitCurrent(), PageUtil.getSize(), tagId);
-        return new PageResultDTO<>(articles, asyncCount.get());
+        return new PageResultDTO<>(articles, asyncCount.join());
     }
 
-    @SneakyThrows
     @Override
     public PageResultDTO<ArchiveDTO> listArchives() {
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<Article>().eq(Article::getIsDelete, 0).eq(Article::getStatus, 1);
-        CompletableFuture<Integer> asyncCount = CompletableFuture.supplyAsync(() -> articleMapper.selectCount(queryWrapper));
+        CompletableFuture<Long> asyncCount = CompletableFuture.supplyAsync(() -> articleMapper.selectCount(queryWrapper));
         List<ArticleCardDTO> articles = articleMapper.listArchives(PageUtil.getLimitCurrent(), PageUtil.getSize());
         HashMap<String, List<ArticleCardDTO>> map = new HashMap<>();
         for (ArticleCardDTO article : articles) {
@@ -218,13 +213,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 return 1;
             } else return Integer.compare(o2Month, o1Month);
         });
-        return new PageResultDTO<>(archiveDTOs, asyncCount.get());
+        return new PageResultDTO<>(archiveDTOs, asyncCount.join());
     }
 
-    @SneakyThrows
     @Override
     public PageResultDTO<ArticleAdminDTO> listArticlesAdmin(ConditionVO conditionVO) {
-        CompletableFuture<Integer> asyncCount = CompletableFuture.supplyAsync(() -> articleMapper.countArticleAdmins(conditionVO));
+        CompletableFuture<Long> asyncCount = CompletableFuture.supplyAsync(() -> articleMapper.countArticleAdmins(conditionVO));
         List<ArticleAdminDTO> articleAdminDTOs = articleMapper.listArticlesAdmin(PageUtil.getLimitCurrent(), PageUtil.getSize(), conditionVO);
         Map<Object, Double> viewsCountMap = redisService.zAllScore(ARTICLE_VIEWS_COUNT);
         articleAdminDTOs.forEach(item -> {
@@ -233,7 +227,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 item.setViewsCount(viewsCount.intValue());
             }
         });
-        return new PageResultDTO<>(articleAdminDTOs, asyncCount.get());
+        return new PageResultDTO<>(articleAdminDTOs, asyncCount.join());
     }
 
     @Override
@@ -308,7 +302,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 String url = uploadStrategyContext.executeUploadStrategy(article.getArticleTitle() + FileExtEnum.MD.getExtName(), inputStream, FilePathEnum.MD.getPath());
                 urls.add(url);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("导出文章失败", e);
                 throw new BizException("导出文章失败");
             }
         }

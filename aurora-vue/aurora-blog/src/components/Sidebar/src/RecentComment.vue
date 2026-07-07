@@ -53,7 +53,7 @@ export default defineComponent({
     const initRecentComment = () => {
       api.getTopSixComments().then(({ data }) => {
         if (data.data.length === 0) {
-          commentStore.recentComment = []
+          commentStore.recentComment = null
         }
         data.data.forEach((itme: any) => {
           itme.createTime = formatTime(itme.createTime)

@@ -78,7 +78,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, toRef, ref, reactive, toRefs, getCurrentInstance, computed, onMounted } from 'vue'
+import { defineComponent, toRef, ref, reactive, toRefs, getCurrentInstance, computed } from 'vue'
 import { useUserStore } from '@/stores/user'
 import AvatarCropper from 'vue-avatar-cropper'
 import api from '@/api/api'
@@ -116,7 +116,7 @@ export default defineComponent({
             message: '绑定成功',
             type: 'success'
           })
-          userStore.userInfo.email = reactiveData.email
+          userStore.userInfo!.email = reactiveData.email
           reactiveData.emailDialogVisible = false
         }
       })
@@ -124,7 +124,7 @@ export default defineComponent({
     const handleSuccess = (data: any) => {
       data.response.json().then((data: any) => {
         if (data.flag) {
-          userStore.userInfo.avatar = data.data
+          userStore.userInfo!.avatar = data.data
           proxy.$notify({
             title: 'Success',
             message: '上传成功',
@@ -136,8 +136,8 @@ export default defineComponent({
     const changeSubscribe = () => {
       if (reactiveData.switchState) {
         let params = {
-          userId: userStore.userInfo.userInfoId,
-          isSubscribe: userStore.userInfo.isSubscribe
+          userId: userStore.userInfo!.userInfoId,
+          isSubscribe: userStore.userInfo!.isSubscribe
         }
         api.updateUserSubscribe(params).then(({ data }) => {
           if (data.flag) {
@@ -152,9 +152,9 @@ export default defineComponent({
     }
     const commit = () => {
       let params = {
-        nickname: userStore.userInfo.nickname,
-        website: userStore.userInfo.website,
-        intro: userStore.userInfo.intro
+        nickname: userStore.userInfo!.nickname,
+        website: userStore.userInfo!.website,
+        intro: userStore.userInfo!.intro
       }
       api.submitUserInfo(params).then(({ data }) => {
         if (data.flag) {
@@ -181,7 +181,7 @@ export default defineComponent({
       reactiveData.switchState = true
       reactiveData.loading = true
       return new Promise((resolve, reject) => {
-        if (userStore.userInfo.email === '' || userStore.userInfo.email === null) {
+        if (userStore.userInfo!.email === '' || userStore.userInfo!.email === null) {
           reactiveData.loading = false
           proxy.$notify({
             title: 'Warning',

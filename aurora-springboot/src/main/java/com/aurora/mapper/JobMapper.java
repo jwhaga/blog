@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface JobMapper extends BaseMapper<Job> {
 
-    Integer countJobs(@Param("jobSearchVO") JobSearchVO jobSearchVO);
+    Long countJobs(@Param("jobSearchVO") JobSearchVO jobSearchVO);
 
     List<JobDTO> listJobs(@Param("current") Long current, @Param("size") Long size, @Param("jobSearchVO")JobSearchVO jobSearchVO);
 

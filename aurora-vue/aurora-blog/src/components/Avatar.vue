@@ -13,12 +13,12 @@ import { useAppStore } from '@/stores/app'
 
 export default defineComponent({
   name: 'Avatar',
-  props: ['url'],
+  props: [],
   setup(props) {
     const appStore = useAppStore()
     return {
-      url: toRefs(props).url,
-      default: computed(() => appStore.websiteConfig.touristAvatar || 'https://static.linhaojun.top/aurora/config/52a81cd2772167b645569342e81ce312.jpg')
+      url: (props as any).url,
+      default: computed(() => appStore.websiteConfig!.touristAvatar || 'https://static.linhaojun.top/aurora/config/52a81cd2772167b645569342e81ce312.jpg')
     }
   }
 })

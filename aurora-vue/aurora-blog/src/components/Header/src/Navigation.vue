@@ -62,7 +62,9 @@
   </nav>
 </template>
 
-<script lang="ts">
+<script lang='ts'>
+import { defineComponent, reactive, toRefs } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 // @ts-nocheck
 
 import { useRouter } from 'vue-router'

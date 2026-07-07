@@ -4,6 +4,9 @@ package com.aurora.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class BeanCopyUtil {
 
     public static <T> T copyObject(Object source, Class<T> target) {
@@ -14,7 +17,7 @@ public class BeanCopyUtil {
                 org.springframework.beans.BeanUtils.copyProperties(source, temp);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Bean 拷贝失败", e);
         }
         return temp;
     }

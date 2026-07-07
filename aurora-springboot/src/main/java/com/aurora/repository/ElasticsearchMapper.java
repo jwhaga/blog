@@ -1,4 +1,4 @@
-package com.aurora.mapper;
+package com.aurora.repository;
 
 import com.aurora.model.dto.ArticleSearchDTO;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;

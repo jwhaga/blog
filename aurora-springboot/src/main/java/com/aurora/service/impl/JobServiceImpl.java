@@ -1,6 +1,8 @@
 package com.aurora.service.impl;
 
 import com.aurora.enums.JobStatusEnum;
+import com.aurora.exception.BizException;
+import com.aurora.exception.TaskException;
 import com.aurora.model.dto.JobDTO;
 import com.aurora.entity.Job;
 import com.aurora.mapper.JobMapper;
@@ -14,7 +16,7 @@ import com.aurora.model.vo.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -28,6 +30,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @Service
 public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobService {
 
@@ -37,23 +40,33 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
     @Autowired
     private JobMapper jobMapper;
 
-    @SneakyThrows
     @PostConstruct
     public void init() {
-        scheduler.clear();
-        List<Job> jobs = jobMapper.selectList(null);
-        for (Job job : jobs) {
-            ScheduleUtil.createScheduleJob(scheduler, job);
+        try {
+            scheduler.clear();
+            List<Job> jobs = jobMapper.selectList(null);
+            for (Job job : jobs) {
+                ScheduleUtil.createScheduleJob(scheduler, job);
+            }
+        } catch (SchedulerException | TaskException e) {
+            log.error("定时任务初始化失败", e);
+            throw new BizException("定时任务初始化失败");
         }
     }
 
-    @SneakyThrows
     @Transactional(rollbackFor = Exception.class)
     public void saveJob(JobVO jobVO) {
         checkCronIsValid(jobVO);
         Job job = BeanCopyUtil.copyObject(jobVO, Job.class);
         int row = jobMapper.insert(job);
-        if (row > 0) ScheduleUtil.createScheduleJob(scheduler, job);
+        if (row > 0) {
+            try {
+                ScheduleUtil.createScheduleJob(scheduler, job);
+            } catch (SchedulerException | TaskException e) {
+                log.error("创建定时任务失败", e);
+                throw new BizException("创建定时任务失败");
+            }
+        }
     }
 
     @Override
@@ -66,7 +79,6 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         if (row > 0) updateSchedulerJob(job, temp.getJobGroup());
     }
 
-    @SneakyThrows
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteJobs(List<Integer> tagIds) {
@@ -92,15 +104,13 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         return jobDTO;
     }
 
-    @SneakyThrows
     @Override
     public PageResultDTO<JobDTO> listJobs(JobSearchVO jobSearchVO) {
-        CompletableFuture<Integer> asyncCount = CompletableFuture.supplyAsync(() -> jobMapper.countJobs(jobSearchVO));
+        CompletableFuture<Long> asyncCount = CompletableFuture.supplyAsync(() -> jobMapper.countJobs(jobSearchVO));
         List<JobDTO> jobDTOs = jobMapper.listJobs(PageUtil.getLimitCurrent(), PageUtil.getSize(), jobSearchVO);
-        return new PageResultDTO<>(jobDTOs, asyncCount.get());
+        return new PageResultDTO<>(jobDTOs, asyncCount.join());
     }
 
-    @SneakyThrows
     @Override
     public void updateJobStatus(JobStatusVO jobStatusVO) {
         Job job = jobMapper.selectById(jobStatusVO.getId());
@@ -114,20 +124,29 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         updateWrapper.eq(Job::getId, jobStatusVO.getId()).set(Job::getStatus, status);
         int row = jobMapper.update(null, updateWrapper);
         if (row > 0) {
-            if (JobStatusEnum.NORMAL.getValue().equals(status)) {
-                scheduler.resumeJob(ScheduleUtil.getJobKey(jobId, jobGroup));
-            } else if (JobStatusEnum.PAUSE.getValue().equals(status)) {
-                scheduler.pauseJob(ScheduleUtil.getJobKey(jobId, jobGroup));
+            try {
+                if (JobStatusEnum.NORMAL.getValue().equals(status)) {
+                    scheduler.resumeJob(ScheduleUtil.getJobKey(jobId, jobGroup));
+                } else if (JobStatusEnum.PAUSE.getValue().equals(status)) {
+                    scheduler.pauseJob(ScheduleUtil.getJobKey(jobId, jobGroup));
+                }
+            } catch (SchedulerException e) {
+                log.error("更新定时任务状态失败", e);
+                throw new BizException("更新定时任务状态失败");
             }
         }
     }
 
-    @SneakyThrows
     @Override
     public void runJob(JobRunVO jobRunVO) {
         Integer jobId = jobRunVO.getId();
         String jobGroup = jobRunVO.getJobGroup();
-        scheduler.triggerJob(ScheduleUtil.getJobKey(jobId, jobGroup));
+        try {
+            scheduler.triggerJob(ScheduleUtil.getJobKey(jobId, jobGroup));
+        } catch (SchedulerException e) {
+            log.error("执行定时任务失败", e);
+            throw new BizException("执行定时任务失败");
+        }
     }
 
     @Override
@@ -140,14 +159,18 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         Assert.isTrue(valid, "Cron表达式无效!");
     }
 
-    @SneakyThrows
     public void updateSchedulerJob(Job job, String jobGroup) {
         Integer jobId = job.getId();
         JobKey jobKey = ScheduleUtil.getJobKey(jobId, jobGroup);
-        if (scheduler.checkExists(jobKey)) {
-            scheduler.deleteJob(jobKey);
+        try {
+            if (scheduler.checkExists(jobKey)) {
+                scheduler.deleteJob(jobKey);
+            }
+            ScheduleUtil.createScheduleJob(scheduler, job);
+        } catch (SchedulerException | TaskException e) {
+            log.error("更新定时任务失败", e);
+            throw new BizException("更新定时任务失败");
         }
-        ScheduleUtil.createScheduleJob(scheduler, job);
     }
 
 }

@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import type { PageParams, LoginParams, RegisterParams, CommentParams, PasswordParams, AccessArticleParams, QQLoginParams } from '@/types/blog'
+import type { PageParams, LoginParams, RegisterParams, CommentParams, PasswordParams, AccessArticleParams } from '@/types/blog'
 
 export default {
   getTopAndFeaturedArticles: () => {

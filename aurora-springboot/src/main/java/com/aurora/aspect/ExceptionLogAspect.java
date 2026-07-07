@@ -5,7 +5,7 @@ import com.aurora.entity.ExceptionLog;
 import com.aurora.event.ExceptionLogEvent;
 import com.aurora.util.ExceptionUtil;
 import com.aurora.util.IpUtil;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
@@ -40,7 +40,7 @@ public class ExceptionLogAspect {
         ExceptionLog exceptionLog = new ExceptionLog();
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
-        ApiOperation apiOperation = method.getAnnotation(ApiOperation.class);
+        Operation operation = method.getAnnotation(Operation.class);
         exceptionLog.setOptUri(Objects.requireNonNull(request).getRequestURI());
         String className = joinPoint.getTarget().getClass().getName();
         String methodName = method.getName();
@@ -54,8 +54,8 @@ public class ExceptionLogAspect {
                 exceptionLog.setRequestParam(JSON.toJSONString(joinPoint.getArgs()));
             }
         }
-        if (Objects.nonNull(apiOperation)) {
-            exceptionLog.setOptDesc(apiOperation.value());
+        if (Objects.nonNull(operation)) {
+            exceptionLog.setOptDesc(operation.summary());
         } else {
             exceptionLog.setOptDesc("");
         }

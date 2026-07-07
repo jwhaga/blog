@@ -11,7 +11,6 @@ import com.aurora.model.dto.PageResultDTO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +24,6 @@ public class JobLogServiceImpl extends ServiceImpl<JobLogMapper, JobLog> impleme
     @Autowired
     private JobLogMapper jobLogMapper;
 
-    @SneakyThrows
     @Override
     public PageResultDTO<JobLogDTO> listJobLogs(JobLogSearchVO jobLogSearchVO) {
         LambdaQueryWrapper<JobLog> queryWrapper = new LambdaQueryWrapper<JobLog>()
@@ -41,7 +39,7 @@ public class JobLogServiceImpl extends ServiceImpl<JobLogMapper, JobLog> impleme
         Page<JobLog> page = new Page<>(PageUtil.getCurrent(), PageUtil.getSize());
         Page<JobLog> jobLogPage = jobLogMapper.selectPage(page, queryWrapper);
         List<JobLogDTO> jobLogDTOs = BeanCopyUtil.copyList(jobLogPage.getRecords(), JobLogDTO.class);
-        return new PageResultDTO<>(jobLogDTOs, (int)jobLogPage.getTotal());
+        return new PageResultDTO<>(jobLogDTOs, jobLogPage.getTotal());
     }
 
     @Override

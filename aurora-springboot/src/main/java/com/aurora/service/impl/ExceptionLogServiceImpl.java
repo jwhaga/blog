@@ -26,7 +26,7 @@ public class ExceptionLogServiceImpl extends ServiceImpl<ExceptionLogMapper, Exc
                 .like(StringUtils.isNotBlank(conditionVO.getKeywords()), ExceptionLog::getOptDesc, conditionVO.getKeywords())
                 .orderByDesc(ExceptionLog::getId));
         List<ExceptionLogDTO> exceptionLogDTOs = BeanCopyUtil.copyList(exceptionLogPage.getRecords(), ExceptionLogDTO.class);
-        return new PageResultDTO<>(exceptionLogDTOs, (int) exceptionLogPage.getTotal());
+        return new PageResultDTO<>(exceptionLogDTOs, exceptionLogPage.getTotal());
     }
 
 }

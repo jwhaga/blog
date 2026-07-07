@@ -1,4 +1,4 @@
-﻿import { defineStore } from 'pinia'
+import { defineStore } from 'pinia'
 import api from '@/api/api'
 import type { Comment, CommentParams, PageParams } from '@/types/blog'
 
@@ -6,7 +6,7 @@ export const useCommentStore = defineStore('commentStore', {
   state: () => {
     return {
       recentComment: null as Comment | null,
-      type: '' as string
+      type: 1 as number
     }
   },
   actions: {

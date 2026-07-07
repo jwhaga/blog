@@ -1,5 +1,5 @@
-﻿import axios from 'axios'
-import type { AxiosResponse, InternalAxiosRequestConfig } from 'axios'
+import axios from 'axios'
+import type { AxiosResponse } from 'axios'
 
 // ============================================================
 // Encapsulated Axios Instance
@@ -24,7 +24,7 @@ const request = axios.create({
 
 // ----- Request interceptor: inject auth token -----
 request.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+  (config: any) => {
     const token = sessionStorage.getItem('token')
     if (token) {
       config.headers['Authorization'] = 'Bearer ' + token

@@ -17,7 +17,6 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import eu.bitwalker.useragentutils.Browser;
 import eu.bitwalker.useragentutils.OperatingSystem;
 import eu.bitwalker.useragentutils.UserAgent;
-import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,34 +88,33 @@ public class AuroraInfoServiceImpl implements AuroraInfoService {
         }
     }
 
-    @SneakyThrows
     @Override
     public AuroraHomeInfoDTO getAuroraHomeInfo() {
-        CompletableFuture<Integer> asyncArticleCount = CompletableFuture.supplyAsync(() -> articleMapper.selectCount(new LambdaQueryWrapper<Article>().eq(Article::getIsDelete, FALSE)));
-        CompletableFuture<Integer> asyncCategoryCount = CompletableFuture.supplyAsync(() -> categoryMapper.selectCount(null));
-        CompletableFuture<Integer> asyncTagCount = CompletableFuture.supplyAsync(() -> tagMapper.selectCount(null));
-        CompletableFuture<Integer> asyncTalkCount = CompletableFuture.supplyAsync(() -> talkMapper.selectCount(null));
+        CompletableFuture<Long> asyncArticleCount = CompletableFuture.supplyAsync(() -> articleMapper.selectCount(new LambdaQueryWrapper<Article>().eq(Article::getIsDelete, FALSE)));
+        CompletableFuture<Long> asyncCategoryCount = CompletableFuture.supplyAsync(() -> categoryMapper.selectCount(null));
+        CompletableFuture<Long> asyncTagCount = CompletableFuture.supplyAsync(() -> tagMapper.selectCount(null));
+        CompletableFuture<Long> asyncTalkCount = CompletableFuture.supplyAsync(() -> talkMapper.selectCount(null));
         CompletableFuture<WebsiteConfigDTO> asyncWebsiteConfig = CompletableFuture.supplyAsync(this::getWebsiteConfig);
-        CompletableFuture<Integer> asyncViewCount = CompletableFuture.supplyAsync(() -> {
+        CompletableFuture<Long> asyncViewCount = CompletableFuture.supplyAsync(() -> {
             Object count = redisService.get(BLOG_VIEWS_COUNT);
-            return Integer.parseInt(Optional.ofNullable(count).orElse(0).toString());
+            return Long.parseLong(Optional.ofNullable(count).orElse(0).toString());
         });
         return AuroraHomeInfoDTO.builder()
-                .articleCount(asyncArticleCount.get())
-                .categoryCount(asyncCategoryCount.get())
-                .tagCount(asyncTagCount.get())
-                .talkCount(asyncTalkCount.get())
-                .websiteConfigDTO(asyncWebsiteConfig.get())
-                .viewCount(asyncViewCount.get()).build();
+                .articleCount(asyncArticleCount.join())
+                .categoryCount(asyncCategoryCount.join())
+                .tagCount(asyncTagCount.join())
+                .talkCount(asyncTalkCount.join())
+                .websiteConfigDTO(asyncWebsiteConfig.join())
+                .viewCount(asyncViewCount.join()).build();
     }
 
     @Override
     public AuroraAdminInfoDTO getAuroraAdminInfo() {
         Object count = redisService.get(BLOG_VIEWS_COUNT);
-        Integer viewsCount = Integer.parseInt(Optional.ofNullable(count).orElse(0).toString());
-        Integer messageCount = commentMapper.selectCount(new LambdaQueryWrapper<Comment>().eq(Comment::getType, 2));
-        Integer userCount = userInfoMapper.selectCount(null);
-        Integer articleCount = articleMapper.selectCount(new LambdaQueryWrapper<Article>()
+        Long viewsCount = Long.parseLong(Optional.ofNullable(count).orElse(0).toString());
+        Long messageCount = commentMapper.selectCount(new LambdaQueryWrapper<Comment>().eq(Comment::getType, 2));
+        Long userCount = userInfoMapper.selectCount(null);
+        Long articleCount = articleMapper.selectCount(new LambdaQueryWrapper<Article>()
                 .eq(Article::getIsDelete, FALSE));
         List<UniqueViewDTO> uniqueViews = uniqueViewService.listUniqueViews();
         List<ArticleStatisticsDTO> articleStatisticsDTOs = articleMapper.listArticleStatistics();

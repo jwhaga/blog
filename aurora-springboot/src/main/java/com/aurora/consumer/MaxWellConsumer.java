@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.aurora.model.dto.ArticleSearchDTO;
 import com.aurora.model.dto.MaxwellDataDTO;
 import com.aurora.entity.Article;
-import com.aurora.mapper.ElasticsearchMapper;
+import com.aurora.repository.ElasticsearchMapper;
 import com.aurora.util.BeanCopyUtil;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;

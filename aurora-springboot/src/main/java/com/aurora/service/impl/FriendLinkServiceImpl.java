@@ -37,7 +37,7 @@ public class FriendLinkServiceImpl extends ServiceImpl<FriendLinkMapper, FriendL
         Page<FriendLink> friendLinkPage = friendLinkMapper.selectPage(page, new LambdaQueryWrapper<FriendLink>()
                 .like(StringUtils.isNotBlank(conditionVO.getKeywords()), FriendLink::getLinkName, conditionVO.getKeywords()));
         List<FriendLinkAdminDTO> friendLinkBackDTOs = BeanCopyUtil.copyList(friendLinkPage.getRecords(), FriendLinkAdminDTO.class);
-        return new PageResultDTO<>(friendLinkBackDTOs, (int) friendLinkPage.getTotal());
+        return new PageResultDTO<>(friendLinkBackDTOs, friendLinkPage.getTotal());
     }
 
     @Override

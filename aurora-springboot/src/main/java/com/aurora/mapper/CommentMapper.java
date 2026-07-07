@@ -22,7 +22,7 @@ public interface CommentMapper extends BaseMapper<Comment> {
 
     List<CommentDTO> listTopSixComments();
 
-    Integer countComments(@Param("conditionVO") ConditionVO conditionVO);
+    Long countComments(@Param("conditionVO") ConditionVO conditionVO);
 
     List<CommentAdminDTO> listCommentsAdmin(@Param("current") Long current, @Param("size") Long size, @Param("conditionVO") ConditionVO conditionVO);
 

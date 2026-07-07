@@ -11,7 +11,9 @@ import org.thymeleaf.context.Context;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 public class EmailUtil {
 
@@ -37,7 +39,7 @@ public class EmailUtil {
             mimeMessageHelper.setText(process, true);
             javaMailSender.send(mimeMessage);
         } catch (MessagingException e) {
-            e.printStackTrace();
+            log.error("邮件发送失败", e);
         }
     }
 

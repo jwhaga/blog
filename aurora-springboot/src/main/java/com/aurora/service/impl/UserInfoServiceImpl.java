@@ -157,7 +157,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         int size = getSize().intValue();
         int toIndex = onlineUsers.size() - fromIndex > size ? fromIndex + size : onlineUsers.size();
         List<UserOnlineDTO> userOnlineList = onlineUsers.subList(fromIndex, toIndex);
-        return new PageResultDTO<>(userOnlineList, onlineUsers.size());
+        return new PageResultDTO<>(userOnlineList, (long) onlineUsers.size());
     }
 
     @Override

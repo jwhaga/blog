@@ -36,7 +36,7 @@ public interface ArticleMapper extends BaseMapper<Article> {
 
     List<ArticleCardDTO> listArchives(@Param("current") Long current, @Param("size") Long size);
 
-    Integer countArticleAdmins(@Param("conditionVO") ConditionVO conditionVO);
+    Long countArticleAdmins(@Param("conditionVO") ConditionVO conditionVO);
 
     List<ArticleAdminDTO> listArticlesAdmin(@Param("current") Long current, @Param("size") Long size, @Param("conditionVO") ConditionVO conditionVO);
 

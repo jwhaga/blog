@@ -1,7 +1,6 @@
 package com.aurora.model.vo;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,17 +13,17 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ApiModel(description = "照片")
+@Schema(description = "照片")
 public class PhotoVO {
 
     @NotNull(message = "相册id不能为空")
-    @ApiModelProperty(name = "id", value = "相册id", required = true, dataType = "Integer")
+    @Schema(name = "id", description = "相册id", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer albumId;
 
-    @ApiModelProperty(name = "photoUrlList", value = "照片列表", required = true, dataType = "List<String>")
+    @Schema(name = "photoUrlList", description = "照片列表", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<String> photoUrls;
 
-    @ApiModelProperty(name = "photoIdList", value = "照片id列表", required = true, dataType = "List<Integer>")
+    @Schema(name = "photoIdList", description = "照片id列表", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<Integer> photoIds;
 
 }

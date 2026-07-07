@@ -52,7 +52,7 @@ public class PhotoAlbumServiceImpl extends ServiceImpl<PhotoAlbumMapper, PhotoAl
 
     @Override
     public PageResultDTO<PhotoAlbumAdminDTO> listPhotoAlbumsAdmin(ConditionVO conditionVO) {
-        Integer count = photoAlbumMapper.selectCount(new LambdaQueryWrapper<PhotoAlbum>()
+        Long count = photoAlbumMapper.selectCount(new LambdaQueryWrapper<PhotoAlbum>()
                 .like(StringUtils.isNotBlank(conditionVO.getKeywords()), PhotoAlbum::getAlbumName, conditionVO.getKeywords())
                 .eq(PhotoAlbum::getIsDelete, FALSE));
         if (count == 0) {
@@ -72,7 +72,7 @@ public class PhotoAlbumServiceImpl extends ServiceImpl<PhotoAlbumMapper, PhotoAl
     @Override
     public PhotoAlbumAdminDTO getPhotoAlbumByIdAdmin(Integer albumId) {
         PhotoAlbum photoAlbum = photoAlbumMapper.selectById(albumId);
-        Integer photoCount = photoMapper.selectCount(new LambdaQueryWrapper<Photo>()
+        Long photoCount = photoMapper.selectCount(new LambdaQueryWrapper<Photo>()
                 .eq(Photo::getAlbumId, albumId)
                 .eq(Photo::getIsDelete, FALSE));
         PhotoAlbumAdminDTO album = BeanCopyUtil.copyObject(photoAlbum, PhotoAlbumAdminDTO.class);
@@ -83,7 +83,7 @@ public class PhotoAlbumServiceImpl extends ServiceImpl<PhotoAlbumMapper, PhotoAl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deletePhotoAlbumById(Integer albumId) {
-        Integer count = photoMapper.selectCount(new LambdaQueryWrapper<Photo>()
+        Long count = photoMapper.selectCount(new LambdaQueryWrapper<Photo>()
                 .eq(Photo::getAlbumId, albumId));
         if (count > 0) {
             photoAlbumMapper.updateById(PhotoAlbum.builder()
