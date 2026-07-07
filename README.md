@@ -1,77 +1,107 @@
-[![Powered by DartNode]( https://dartnode.com/branding/DN-Open-Source-sm.png)]( https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
-# Aurora---前后端分离博客
+﻿# Aurora — 前后端分离博客（重构版）
 
-### 轻量版后端: https://github.com/zhouyqxy/aurora_Lite
+> 本仓库是 Aurora 博客项目的 **JDK 25 + Spring Boot 3.x 重构版**。
+> 原始项目位于 [`../aurora/`](../aurora/) 目录，保持只读作为对比基线。
 
-## 前言
+---
 
-- 开源不易，希望大家star支持一下
-- 由于本人还在上学，主语言并不是Java，所以项目更新频率较慢，但是本项目会长期维护，有问题可以提issue，
-  同时也欢迎大家来共建此项目，包括但不限于：bug 修复、代码优化、功能开发等等
+## 技术栈（重构后）
 
-## 在线地址
+| 层级 | 技术 | 原始版本 | 重构版本 |
+|------|------|----------|----------|
+| JDK | — | 1.8 | **25** (Temurin) |
+| 框架 | Spring Boot | 2.3.7.RELEASE | **3.5.16** |
+| 安全 | Spring Security | 5.x | **6.x** (SecurityFilterChain + JWT) |
+| ORM | MyBatis-Plus | 3.4.2 | **3.5.9** |
+| 搜索 | Elasticsearch | 7.9.2 | **8.15.3** + IK |
+| 文档 | Knife4j | 2.0.7 | **4.5.0** (OpenAPI 3) |
+| JWT | jjwt | 0.9.0 | **0.12.6** |
+| 测试 | — | 0 | **56 个单元测试** |
 
-- 前台链接：[www.linhaojun.top](https://www.linhaojun.top)
-- 后台链接：[admin.linhaojun.top](https://admin.linhaojun.top)
-- 演示账号：test@163.com，密码：123456
-
-## 效果图
-
-### 图片1：
-![图片1](https://s3.bmp.ovh/imgs/2023/06/25/8a6ad38dfb27bb3a.png)
-
-### 图片2：
-![图片2](https://s3.bmp.ovh/imgs/2023/06/25/7036a13dc0a0488a.png)
-
-## 相关技术
-
-### 前端：
-
-- 样式来自于：[hexo的aurora主题](https://github.com/auroral-ui/hexo-theme-aurora)
-- 基础框架：vue3(前台) vue2(后台)
-- 状态管理：pinia(前台) vuex(后台)
-- 路由组件：vue-router
-- 网络请求：axios
-- 其他技术：详见前端项目的package.json
-
-### 后端：
-
-- 基础框架：springboot
-- ORM框架：mybatisplus
-- 权限框架：springsecurity
-- 缓存中间件：redis
-- 消息中间件：rabbitmq
-- 搜索引擎：elasticsearch
-- 对象存储：minio
-- 定时任务：quartz
-- 其他技术：详见后端项目的pom.xml
-
-## 后续计划
-
-- [ ] 前台代码优化
-- [ ] 后台vue3重构
-- [ ] 后端提供轻量化选择
+> 完整技术栈清单见 [技术栈.md](技术栈.md)。
 
 ## 快速开始
 
-一键安装
+### 前置条件
 
-执行如下命令一键安装 Aurora 博客：
+- JDK 25 + Maven 3.9+
+- Docker Desktop（MySQL、Redis、RabbitMQ、ES）
+- Node.js 24（前端）
+- 详见 [本地运行环境清单.md](本地运行环境清单.md)
 
-```shell
-curl -sSL https://kangxianghui.top/api/Util/OnlineView/aurora_shell/aurora_install.sh -o aurora_install.sh && sh aurora_install.sh
+### 启动基础设施
+
+```powershell
+# 一键启动 MySQL、Redis、RabbitMQ、Elasticsearch
+docker compose up -d
+
+# 确认所有服务健康
+docker ps
 ```
 
-此命令适用于：CentOS 操作系统
+### 编译与测试
 
-## 部署
+```powershell
+$env:JAVA_HOME = "D:\Develop\JDK25\jdk-25.0.3+9"
 
-- 详见项目部署文档
+# 编译
+mvn clean compile -f aurora-springboot\pom.xml -q
 
-## 交流群
+# 运行 56 个单元测试
+mvn clean test -f aurora-springboot\pom.xml
 
-- QQ群：338371628
+# 打包
+mvn clean package -f aurora-springboot\pom.xml -DskipTests -q
+```
 
-## 鸣谢
+### 启动后端
 
-- 感谢[jetbrains](https://www.jetbrains.com/)提供的开源开发许可证
+```powershell
+D:\Develop\JDK25\jdk-25.0.3+9\bin\java.exe -jar aurora-springboot\target\aurora-springboot-0.0.1.jar --spring.profiles.active=dev --server.port=8081
+```
+
+### 登录
+
+| 用户名 | 密码 | 说明 |
+|--------|------|------|
+| `admin@163.com` | `admin` | 管理员（t_user_auth 表 id=1） |
+
+## 项目结构
+
+```
+重构版/
+├── aurora-springboot/      # 后端（Maven + Spring Boot 3.5.16 + JDK 25）
+│   ├── src/main/java/      # 源代码
+│   ├── src/main/resources/ # 配置与 SQL
+│   └── pom.xml
+├── aurora-vue/             # 前端（Vue 3 前台 + Vue 2 后台）
+├── .github/workflows/      # CI/CD（GitHub Actions）
+├── docker-compose.yml      # 基础设施编排
+├── Dockerfile.es           # ES 8.15.3 + IK 构建
+└── 文档                     # 重构方案、技术栈、环境清单等
+```
+
+## 重构进度
+
+| 阶段 | 状态 |
+|------|------|
+| Phase 1：后端核心框架升级 (Part 1.1~1.8) | ✅ M1 达成（后端可编译启动） |
+| Phase 2：后端代码治理 (Part 2.1~2.6) | ✅ M2 达成（代码治理完成） |
+| Phase 4：基础设施与工程化 (Part 4.1~4.4) | ✅ 进行中 |
+| Phase 3：前端重构 (Part 3.1~3.6) | ⏳ 待开始 |
+| Phase 5：收尾与发布 | ⏳ 待开始 |
+
+## 相关文档
+
+| 文档 | 说明 |
+|------|------|
+| [技术栈.md](技术栈.md) | 完整技术清单及版本 |
+| [本地运行环境清单.md](本地运行环境清单.md) | 本地开发环境搭建指南 |
+| [重构方案.md](重构方案.md) | 重构总体方案与任务分解 |
+| [测试策略.md](测试策略.md) | 测试分层策略与计划 |
+| [代码规范.md](代码规范.md) | 编码规范与 Git 提交规范 |
+| [交接文档.md](交接文档.md) | 重构进度交接（供 AI 会话恢复上下文） |
+
+## 开源许可
+
+基于原始项目 [aurora](https://github.com/linhaojun123/aurora) 重构，遵循原始项目开源协议。
