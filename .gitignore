@@ -20,6 +20,11 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+*.log
+*.pid
+full_build_output.txt
+.trae/
 
-/target/
+
+target/
 /test/
