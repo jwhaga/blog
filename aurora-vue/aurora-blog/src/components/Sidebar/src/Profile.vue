@@ -1,23 +1,23 @@
-<template>
+﻿<template>
   <div class="h-98 w-full rounded-2xl relative shadow-xl mb-8" :style="gradientBackground">
     <div
       class="ob-gradient-cut-plate absolute bg-ob-deep-900 rounded-xl opacity-90 flex justify-center items-center pt-4 px-6 shadow-lg hover:shadow-2xl duration-300"
       data-dia="author">
       <div class="profile absolute w-full flex flex-col justify-center items-center">
         <div class="flex flex-col justify-center items-center">
-          <img v-if="websiteConfig.authorAvatar" :class="avatarClass" :src="websiteConfig.authorAvatar" />
+          <img v-if="websiteConfig?.authorAvatar" :class="avatarClass" :src="websiteConfig?.authorAvatar" />
           <img v-else :class="avatarClass" :src="default" />
           <h2 class="text-center pt-4 text-4xl font-semibold text-ob-bright">
-            <template v-if="websiteConfig.author">
-              {{ websiteConfig.author }}
+            <template v-if="websiteConfig?.author">
+              {{ websiteConfig?.author }}
             </template>
             <ob-skeleton v-else height="2.25rem" width="7rem" />
           </h2>
           <span class="h-1 w-14 rounded-full mt-2" :style="gradientBackground" />
           <p
-            v-if="websiteConfig.authorIntro"
+            v-if="websiteConfig?.authorIntro"
             class="pt-6 px-10 w-full text-s text-center"
-            v-html="websiteConfig.authorIntro" />
+            v-html="websiteConfig?.authorIntro" />
           <p v-else class="pt-6 px-10 w-full text-sm text-center flex flex-col gap-2">
             <ob-skeleton :count="2" height="20px" width="10rem" />
           </p>
@@ -63,7 +63,7 @@ export default defineComponent({
     const appStore = useAppStore()
     const { t } = useI18n()
     return {
-      default: 'https://static.linhaojun.top/aurora/config/52a81cd2772167b645569342e81ce312.jpg',
+      default: process.env.VUE_APP_OSS_URL + '/config/52a81cd2772167b645569342e81ce312.jpg',
       avatarClass: computed(() => {
         return {
           'ob-avatar': true,
@@ -94,3 +94,4 @@ export default defineComponent({
   max-height: 100%;
 }
 </style>
+

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="flex-shrink-0">
     <div class="rounded-full ring-gray-100 overflow-hidden shaodw-lg w-9 xl:w-10">
       <template v-if="url != null"> <img class="avatar-img" :src="url" alt="" /></template>
@@ -18,7 +18,7 @@ export default defineComponent({
     const appStore = useAppStore()
     return {
       url: (props as any).url,
-      default: computed(() => appStore.websiteConfig!.touristAvatar || 'https://static.linhaojun.top/aurora/config/52a81cd2772167b645569342e81ce312.jpg')
+      default: computed(() => appStore.websiteConfig?.touristAvatar || process.env.VUE_APP_OSS_URL + '/config/52a81cd2772167b645569342e81ce312.jpg')
     }
   }
 })
@@ -34,3 +34,4 @@ export default defineComponent({
   transform: rotate(360deg);
 }
 </style>
+

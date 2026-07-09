@@ -8,7 +8,7 @@ import 'nprogress/nprogress.css'
 nProgress.configure({
   showSpinner: false,
   trickleSpeed: 100,
-  parent: '#loading-bar-wrapper'
+  parent: 'body'
 })
 
 const setTheme = (theme: string) => {
@@ -43,7 +43,7 @@ export const useAppStore = defineStore('appStore', {
         }
       },
       appLoading: false,
-      websiteConfig: null as WebsiteConfig | null,
+      websiteConfig: {} as WebsiteConfig,
       viewCount: 0,
       articleCount: 0,
       talkCount: 0,

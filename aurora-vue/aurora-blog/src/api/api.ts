@@ -1,4 +1,4 @@
-import request from '@/utils/request'
+﻿import request from '@/utils/request'
 import type { PageParams, LoginParams, RegisterParams, CommentParams, PasswordParams, AccessArticleParams } from '@/types/blog'
 
 export default {
@@ -30,7 +30,14 @@ export default {
     return request.get('/api/archives/all', { params: params })
   },
   login: (params: LoginParams) => {
-    return request.post('/api/users/login', params)
+    const formData = new URLSearchParams()
+    formData.append('username', params.username)
+    formData.append('password', params.password)
+    return request.post('/api/users/login', formData, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    })
   },
   saveComment: (params: CommentParams) => {
     return request.post('/api/comments/save', params)

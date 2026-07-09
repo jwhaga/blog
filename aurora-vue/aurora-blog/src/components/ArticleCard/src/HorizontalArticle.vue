@@ -1,5 +1,5 @@
 <template>
-  <div class="article-container" @click="toArticle">
+  <div v-if="article" class="article-container" @click="toArticle">
     <span v-if="article.isTop" class="article-tag">
       <b>
         <svg-icon icon-class="pin" />
@@ -51,7 +51,7 @@
           <div class="flex flex-row items-center">
             <img
               class="hover:opacity-50 cursor-pointer"
-              :src="article.author.avatar"
+              :src="article.author?.avatar"
               alt=""
               @click="handleAuthorClick(article.author.website)" />
             <span class="text-ob-dim">
@@ -103,11 +103,11 @@ export default defineComponent({
     const toArticle = () => {
       let isAccess = false
       userStore.accessArticles.forEach((item: any) => {
-        if (item == articleStore.topArticle!.id) {
+        if (item == articleStore.topArticle?.id) {
           isAccess = true
         }
       })
-      if (articleStore.topArticle!.status == 2 && isAccess == false) {
+      if (articleStore.topArticle?.status == 2 && isAccess == false) {
         if (userStore.userInfo === null) {
           proxy.$notify({
             title: 'Warning',
@@ -115,10 +115,10 @@ export default defineComponent({
             type: 'warning'
           })
         } else {
-          emitter.emit('changeArticlePasswordDialogVisible', articleStore.topArticle!.id)
+          emitter.emit('changeArticlePasswordDialogVisible', articleStore.topArticle?.id)
         }
       } else {
-        router.push({ path: '/articles/' + articleStore.topArticle!.id })
+        router.push({ path: '/articles/' + articleStore.topArticle?.id })
       }
     }
     return {

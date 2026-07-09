@@ -2,7 +2,7 @@
   <div class="sidebar-box">
     <SubTitle :title="'titles.recent_comment'" icon="quote" />
     <ul>
-      <template v-if="comments.length > 0">
+      <template v-if="comments && comments.length > 0">
         <li
           class="bg-ob-deep-900 px-2 py-3 mb-1.5 rounded-lg flex flex-row justify-items-center items-center shadow-sm hover:shadow-ob transition-shadow"
           v-for="comment in comments"
@@ -70,7 +70,7 @@ export default defineComponent({
     }
     return {
       comments: toRef(commentStore.$state, 'recentComment'),
-      default: 'https://static.linhaojun.top/aurora/config/0af1901da1e64dfb99bb61db21e716c4.jpeg',
+      default: process.env.VUE_APP_OSS_URL + '/config/0af1901da1e64dfb99bb61db21e716c4.jpeg',
       t
     }
   }
@@ -98,3 +98,4 @@ export default defineComponent({
   transform: rotate(360deg);
 }
 </style>
+

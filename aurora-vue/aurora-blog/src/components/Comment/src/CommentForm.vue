@@ -70,7 +70,7 @@ export default defineComponent({
       api.saveComment(params).then(({ data }) => {
         if (data.flag) {
           fetchComments()
-          let isCommentReview = appStore.websiteConfig!.isCommentReview
+          let isCommentReview = appStore.websiteConfig?.isCommentReview
           if (isCommentReview) {
             proxy.$notify({
               title: 'Warning',
@@ -108,7 +108,7 @@ export default defineComponent({
     }
     return {
       ...toRefs(reactiveData),
-      avatar: computed(() => userStore.userInfo!.avatar),
+      avatar: computed(() => userStore.userInfo?.avatar),
       saveComment
     }
   }

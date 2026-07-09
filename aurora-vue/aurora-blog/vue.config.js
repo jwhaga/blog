@@ -4,12 +4,13 @@ function resolve(dir) {
   return path.join(__dirname, dir)
 }
 module.exports = defineConfig({
+  parallel: false,
   transpileDependencies: true,
   productionSourceMap: false,
   devServer: {
     proxy: {
       '/api': {
-        target: 'https://www.linhaojun.top/api',
+         target: 'http://localhost:8081',
         changeOrigin: true,
         pathRewrite: {
           '^/api': ''
@@ -25,6 +26,11 @@ module.exports = defineConfig({
     }
   },
   chainWebpack: (config) => {
+    // 注入 QQ 回调地址到 index.html，部署前修改 VUE_APP_QQ_REDIRECT_URI 即可
+    config.plugin('html').tap(args => {
+      args[0].qqRedirectUri = process.env.VUE_APP_QQ_REDIRECT_URI || 'http://localhost:8080/oauth/login/qq'
+      return args
+    })
     config.resolve.alias.set('vue-i18n', 'vue-i18n/dist/vue-i18n.cjs.js')
     config.module.rule('svg').exclude.add(resolve('src/icons')).end()
     config.module
@@ -40,3 +46,5 @@ module.exports = defineConfig({
       .end()
   }
 })
+
+

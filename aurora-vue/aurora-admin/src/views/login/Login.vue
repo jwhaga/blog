@@ -1,5 +1,5 @@
-<template>
-  <div class="login-container">
+﻿<template>
+  <div class="login-container" :style="{ background: 'url(' + bgUrl + ') center center / cover no-repeat' }">
     <div class="login-card">
       <div class="login-title">管理员登录</div>
       <el-form status-icon :model="loginForm" :rules="rules" ref="ruleForm" class="login-form">
@@ -73,8 +73,7 @@ export default {
   bottom: 0;
   right: 0;
   left: 0;
-  background: url(https://static.linhaojun.top/aurora/photos/765664a8a75211296a9cd89671d6d660.png) center center / cover
-    no-repeat;
+
 }
 .login-card {
   position: absolute;
@@ -98,3 +97,5 @@ export default {
   width: 100%;
 }
 </style>
+
+

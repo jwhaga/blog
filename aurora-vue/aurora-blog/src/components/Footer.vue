@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div id="footer" class="relative w-full pt-1" :style="gradientBackground">
     <span class="bg-ob-deep-900 flex justify-center">
       <div
@@ -8,17 +8,17 @@
           <ul class="flex flex-col gap-2 mx-auto">
             <li class="flex flex-row mx-auto">
               Copyright © 2022 - {{ currentYear }}
-              <b class="font-extrabold">&nbsp;{{ websiteConfig.author }}</b>
+              <b class="font-extrabold">&nbsp;{{ websiteConfig?.author }}</b>
             </li>
-            <li v-if="websiteConfig.gonganBeianNumber != '' && websiteConfig.gonganBeianNumber != undefined" class="flex flex-row mx-auto">
+            <li v-if="websiteConfig?.gonganBeianNumber != '' && websiteConfig?.gonganBeianNumber != undefined" class="flex flex-row mx-auto">
               <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=11011402013558" target="_blank">
-                <img src="https://oss.supermouse.cn/aurora/config/gongan-beian-icon.png" style="float:left;"/> &nbsp;
-                <b class="font-extrabold border-b-2 border-ob hover:text-ob"> {{ websiteConfig.gonganBeianNumber }} </b>
+                <img :src="process.env.VUE_APP_OSS_URL + '/config/gongan-beian-icon.png'" style="float:left;"/> &nbsp;
+                <b class="font-extrabold border-b-2 border-ob hover:text-ob"> {{ websiteConfig?.gonganBeianNumber }} </b>
               </a>
             </li>
-            <li v-if="websiteConfig.beianNumber != '' && websiteConfig.beianNumber != undefined" class="flex flex-row mx-auto">
+            <li v-if="websiteConfig?.beianNumber != '' && websiteConfig?.beianNumber != undefined" class="flex flex-row mx-auto">
               <a href="https://beian.miit.gov.cn/" target="_blank">
-                <b class="font-extrabold border-b-2 border-ob hover:text-ob"> {{ websiteConfig.beianNumber }} </b>
+                <b class="font-extrabold border-b-2 border-ob hover:text-ob"> {{ websiteConfig?.beianNumber }} </b>
               </a>
             </li>
           </ul>
@@ -56,3 +56,4 @@ export default defineComponent({
   }
 })
 </script>
+

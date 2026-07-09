@@ -36,7 +36,7 @@
           <div class="post-footer" v-if="article.author">
             <img
               class="hover:opacity-50 cursor-pointer"
-              v-lazy="article.author.avatar || ''"
+              v-lazy="article.author?.avatar || ''"
               alt="author avatar"
               @click="handleAuthorClick(article.author.website)" />
             <span class="text-white opacity-80">

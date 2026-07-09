@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeMount, onUnmounted, ref } from 'vue'
+import { computed, defineComponent, onBeforeMount, onUnmounted, onErrorCaptured, ref } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { useCommonStore } from '@/stores/common'
 import { useMetaStore } from '@/stores/meta'
@@ -99,7 +99,7 @@ export default defineComponent({
         appStore.categoryCount = data.data.categoryCount
         appStore.tagCount = data.data.tagCount
         appStore.websiteConfig = data.data.websiteConfigDTO
-        initFavicon(data.data.websiteConfigDTO.favicon)
+        if (data.data.websiteConfigDTO) { initFavicon(data.data.websiteConfigDTO.favicon) }
       })
     }
     const copyEventHandler = (event: any) => {
@@ -154,7 +154,7 @@ export default defineComponent({
       }
     }
     return {
-      title: computed(() => appStore.websiteConfig!.websiteTitle || metaStore.title),
+      title: computed(() => appStore.websiteConfig?.websiteTitle || metaStore.title),
       theme: computed(() => appStore.themeConfig.theme),
       headerImage: computed(() => {
         return {

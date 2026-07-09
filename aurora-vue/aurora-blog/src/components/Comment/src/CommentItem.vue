@@ -1,7 +1,7 @@
 <template>
   <div class="mt-5 max-w-full">
     <div class="flex space-x-3 xl:space-x-5">
-      <Avatar :url="comment.avatar" />
+      <Avatar :url="comment?.avatar" />
       <div class="max-w-full-calc space-y-5">
         <div class="bg-white text-primary p-4 rounded-md relative shadow-md reply" style="width: fit-content">
           <p class="commentContent" v-html="comment.commentContent.replaceAll('\n', '<br>')" />

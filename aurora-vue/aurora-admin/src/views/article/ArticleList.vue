@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <el-card class="main-card">
     <div class="title">{{ this.$route.name }}</div>
     <div class="article-status-menu">
@@ -98,7 +98,7 @@
             :src="
               scope.row.articleCover
                 ? scope.row.articleCover
-                : 'https://static.talkxj.com/articles/c5cc2b2561bd0e3060a500198a4ad37d.png'
+                : process.env.VUE_APP_OSS_URL + '/articles/c5cc2b2561bd0e3060a500198a4ad37d.png'
             " />
           <i v-if="scope.row.status == 1" class="iconfont el-icon-mygongkai article-status-icon" />
           <i v-if="scope.row.status == 2" class="iconfont el-icon-mymima article-status-icon" />
@@ -567,3 +567,4 @@ export default {
   bottom: 1.4rem;
 }
 </style>
+

@@ -43,6 +43,7 @@ plugins.forEach((plugin) => {
 })
 registerSvgIcon(app)
 registerObSkeleton(app)
+app.config.errorHandler = (err, instance, info) => { console.warn('[Aurora]', err) }
 app.mount('#app')
 api.report()
 console.log('%c 网站作者:花未眠', 'color:#bada55')

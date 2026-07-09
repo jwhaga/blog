@@ -138,7 +138,7 @@ export default defineComponent({
     }
     const handleSearch: any = (status: boolean) => {
       navigatorStore.setOpenNavigator(false)
-      searchStore.setOpenModal(status)
+      searchStore.setOpenModal(true)
     }
     return {
       gradient: computed(() => {

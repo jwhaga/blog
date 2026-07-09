@@ -159,12 +159,6 @@
           <div class="search-logo">
             <a href="" target="_blank" rel="noopener noreferrer">
               <span class="search-label">{{ t('settings.searched-by') }}</span>
-              <img
-                class="mr-1.5"
-                src="https://static.linhaojun.top/aurora/config/cc36e9fa5aeb214e41495c1e2268f2db.png"
-                alt="ObsidianNext Logo"
-                height="20"
-                width="20" />
               <span class="text-ob">ElasticSearch</span>
             </a>
           </div>
@@ -271,13 +265,13 @@ export default defineComponent({
         if (searchInput.value) searchInput.value.focus()
       }, 200)
     })
-    onUpdated(() => {
-      keywords.value = ''
-      searchResults.value = []
-      setTimeout(() => {
-        if (searchInput.value) searchInput.value.focus()
-      }, 200)
-    })
+    //     onUpdated(() => {
+    //       keywords.value = ''
+    //       searchResults.value = []
+    //       setTimeout(() => {
+    //         if (searchInput.value) searchInput.value.focus()
+    //       }, 200)
+    //     })
     onUnmounted(() => {
       document.body.classList.remove('modal--active')
     })
@@ -430,3 +424,4 @@ export default defineComponent({
   }
 })
 </script>
+

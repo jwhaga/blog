@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <el-card class="main-card">
     <div class="title">{{ this.$route.name }}</div>
     <div class="article-title-container">
@@ -128,7 +128,7 @@
           <el-input v-model="article.password" placeholder="请填写文章访问密码" />
         </el-form-item>
         <el-form-item label="文章摘要">
-          <el-input type="textarea" autosize="true" v-model="article.articleAbstract" placeholder="默认取文章前500个字符" />
+          <el-input type="textarea" :autosize="true" v-model="article.articleAbstract" placeholder="默认取文章前500个字符" />
         </el-form-item>
       </el-form>
       <div slot="footer">
@@ -209,11 +209,11 @@ export default {
       })
     },
     openModel() {
-      if (this.article.articleTitle.trim() == '') {
+      if ((this.article.articleTitle || '').trim() == '') {
         this.$message.error('文章标题不能为空')
         return false
       }
-      if (this.article.articleContent.trim() == '') {
+      if ((this.article.articleContent || '').trim() == '') {
         this.$message.error('文章内容不能为空')
         return false
       }
@@ -251,11 +251,11 @@ export default {
       }
     },
     saveArticleDraft() {
-      if (this.article.articleTitle.trim() == '') {
+      if ((this.article.articleTitle || '').trim() == '') {
         this.$message.error('文章标题不能为空')
         return false
       }
-      if (this.article.articleContent.trim() == '') {
+      if ((this.article.articleContent || '').trim() == '') {
         this.$message.error('文章内容不能为空')
         return false
       }
@@ -283,11 +283,11 @@ export default {
       this.autoSave = false
     },
     saveOrUpdateArticle() {
-      if (this.article.articleTitle.trim() == '') {
+      if ((this.article.articleTitle || '').trim() == '') {
         this.$message.error('文章标题不能为空')
         return false
       }
-      if (this.article.articleContent.trim() == '') {
+      if ((this.article.articleContent || '').trim() == '') {
         this.$message.error('文章内容不能为空')
         return false
       }
@@ -299,7 +299,7 @@ export default {
         this.$message.error('文章标签不能为空')
         return false
       }
-      if (this.article.articleCover.trim() == '') {
+      if ((this.article.articleCover || '').trim() == '') {
         this.$message.error('文章封面不能为空')
         return false
       }
@@ -329,8 +329,8 @@ export default {
     autoSaveArticle() {
       if (
         this.autoSave &&
-        this.article.articleTitle.trim() != '' &&
-        this.article.articleContent.trim() != '' &&
+        (this.article.articleTitle || '').trim() != '' &&
+        (this.article.articleContent || '').trim() != '' &&
         this.article.id != null
       ) {
         this.axios.post('/api/admin/articles', this.article).then(({ data }) => {
@@ -467,3 +467,4 @@ export default {
   overflow-y: auto;
 }
 </style>
+

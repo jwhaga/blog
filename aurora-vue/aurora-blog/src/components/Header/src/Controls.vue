@@ -14,15 +14,15 @@
         <DropdownItem name="cn">中文</DropdownItem>
       </DropdownMenu>
     </Dropdown>
-    <template v-if="userInfo === ''">
+    <template v-if="!userInfo">
       <span class="mr-3" @click="openLoginDialog">{{ t('settings.login') }}</span>
     </template>
-    <template v-if="userInfo !== ''">
+    <template v-if="userInfo">
       <Dropdown hover>
         <span class="mr-2">
           <div class="flex-shrink-0">
             <div class="rounded-full ring-gray-100 overflow-hidden shaodw-lg w-9">
-              <img class="avatar-img" :src="userInfo.avatar" alt="" />
+              <img class="avatar-img" :src="userInfo?.avatar" alt="" />
             </div>
           </div>
         </span>
@@ -181,10 +181,11 @@ export default defineComponent({
         })
         return
       }
-      let params = new URLSearchParams()
-      params.append('username', loginInfo.username)
-      params.append('password', loginInfo.password)
-      api.login(params as any).then(({ data }) => {
+      let params = {
+        username: loginInfo.username,
+        password: loginInfo.password
+      }
+      api.login(params).then(({ data }) => {
         if (data.flag) {
           userStore.userInfo = data.data
           sessionStorage.setItem('token', data.data.token)
@@ -195,14 +196,26 @@ export default defineComponent({
             type: 'success'
           })
           reactiveDate.loginDialogVisible = false
+        } else {
+          proxy.$notify({
+            title: 'Error',
+            message: data.message || '登录失败',
+            type: 'error'
+          })
         }
+      }).catch((error) => {
+        proxy.$notify({
+          title: 'Error',
+          message: error.message || '登录失败',
+          type: 'error'
+        })
       })
     }
     const logout = () => {
       api.logout().then(({ data }) => {
         if (data.flag) {
           userStore.userInfo = null
-          userStore.token = ""
+          userStore.token = ''
           userStore.accessArticles = []
           sessionStorage.removeItem('token')
           proxy.$notify({
@@ -264,7 +277,7 @@ export default defineComponent({
       })
     }
     const handleOpenModel: any = (status: boolean) => {
-      searchStore.setOpenModal(status)
+      searchStore.setOpenModal(true)
     }
 
     const qqLogin = () => {
@@ -310,13 +323,13 @@ export default defineComponent({
       }
       api
         .accessArticle({
-          articleId: reactiveDate.articleId as any,
+          articleId: Number(reactiveDate.articleId),
           password: reactiveDate.articlePassword
         })
         .then(({ data }) => {
           if (data.flag) {
             reactiveDate.articlePasswordDialogVisible = false
-            userStore.accessArticles.push(reactiveDate.articleId as any)
+            userStore.accessArticles.push(Number(reactiveDate.articleId))
             router.push({ path: '/articles/' + reactiveDate.articleId })
           }
         })
@@ -342,7 +355,7 @@ export default defineComponent({
       accessArticle,
       multiLanguage: computed(() => {
         let websiteConfig: any = appStore.websiteConfig
-        return websiteConfig.multiLanguage
+        return websiteConfig?.multiLanguage
       }),
       t
     }

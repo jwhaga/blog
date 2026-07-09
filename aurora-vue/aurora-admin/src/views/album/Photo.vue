@@ -334,10 +334,11 @@ export default {
       return new Promise((resolve) => {
         if (file.size / 1024 < this.config.UPLOAD_SIZE) {
           resolve(file)
+        } else {
+          imageConversion.compressAccurately(file, this.config.UPLOAD_SIZE).then((res) => {
+            resolve(res)
+          }).catch(() => resolve(file))
         }
-        imageConversion.compressAccurately(file, this.config.UPLOAD_SIZE).then((res) => {
-          resolve(res)
-        })
       })
     },
     handleCheckAllChange(val) {

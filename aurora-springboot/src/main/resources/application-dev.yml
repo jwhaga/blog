@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${SERVER_PORT:8089}
 
 spring:
   datasource:
@@ -76,18 +76,37 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
 
+# ---------------------------------------------------------------------------
+# 文件上传配置
+# mode: oss（阿里云OSS）/ minio（本地 MinIO）
+# url: 对象存储访问域名，对应前端 VUE_APP_OSS_URL
+#       开发环境用 MinIO 本地地址，生产环境替换为云存储域名
+# ---------------------------------------------------------------------------
 upload:
   mode: ${UPLOAD_MODE:minio}
+  # 对象存储访问基础 URL（供前端拼接图片地址）
+  url: ${OSS_URL:http://localhost:9000/aurora}
   minio:
-    url: ${MINIO_URL:http://localhost:9000}
+    url: ${MINIO_URL:http://localhost:9000/aurora/}
     endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
     bucket-name: ${MINIO_BUCKET:aurora}
     access-key: ${MINIO_ACCESS_KEY:minioadmin}
     secret-key: ${MINIO_SECRET_KEY:minioadmin}
 
+# ---------------------------------------------------------------------------
+# 网站部署地址
+# 用于邮件模板链接、Knife4j API 文档地址、百度 SEO 推送等场景
+# 开发环境: http://localhost:8080
+# 生产环境: 替换为 https://www.yourdomain.com
+# ---------------------------------------------------------------------------
 website:
   url: ${WEBSITE_URL:http://localhost:8080}
 
+# ---------------------------------------------------------------------------
+# QQ 互联登录配置
+# app-id: 在 QQ 互联（https://connect.qq.com）申请的应用 ID
+# 开发环境可留空，需部署到公网域名并经 QQ 互联审核通过后才能使用
+# ---------------------------------------------------------------------------
 qq:
   app-id: ${QQ_APP_ID:}
   check-url: https://graph.qq.com/user/get_user_info
