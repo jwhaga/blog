@@ -45,6 +45,8 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
         updateUserInfo();
     }
 
+    // 注意: 此处为同类内直接调用 updateUserInfo(), @Async 注解不会生效(未经过 Spring 代理)。
+    // 当前保留原行为, 如需异步生效需将该方法拆分到独立 Bean 中通过注入方式调用。
     @Async
     public void updateUserInfo() {
         UserAuth userAuth = UserAuth.builder()

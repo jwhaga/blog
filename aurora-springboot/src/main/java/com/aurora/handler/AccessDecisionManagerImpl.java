@@ -14,6 +14,9 @@ import java.util.stream.Collectors;
 
 @Component
 public class AccessDecisionManagerImpl implements AccessDecisionManager {
+
+    private static final String ACCESS_DENIED_MESSAGE = "权限不足";
+
     @Override
     public void decide(Authentication authentication, Object o, Collection<ConfigAttribute> collection) throws AccessDeniedException, InsufficientAuthenticationException {
         List<String> permissionList = authentication.getAuthorities()
@@ -25,7 +28,7 @@ public class AccessDecisionManagerImpl implements AccessDecisionManager {
                 return;
             }
         }
-        throw new AccessDeniedException("权限不足");
+        throw new AccessDeniedException(ACCESS_DENIED_MESSAGE);
     }
 
     @Override

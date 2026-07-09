@@ -5,17 +5,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.MessageDigest;
 import java.util.Objects;
 
 @Slf4j
 public class FileUtil {
 
+    private static final String MD5_ALGORITHM = "md5";
+
+    private static final int BUFFER_SIZE = 8192;
+
     public static String getMd5(InputStream inputStream) {
         try {
-            MessageDigest md5 = MessageDigest.getInstance("md5");
-            byte[] buffer = new byte[8192];
+            MessageDigest md5 = MessageDigest.getInstance(MD5_ALGORITHM);
+            byte[] buffer = new byte[BUFFER_SIZE];
             int length;
             while ((length = inputStream.read(buffer)) != -1) {
                 md5.update(buffer, 0, length);
@@ -39,7 +45,11 @@ public class FileUtil {
         if (StringUtils.isBlank(fileName)) {
             return "";
         }
-        return fileName.substring(fileName.lastIndexOf("."));
+        int lastDotIndex = fileName.lastIndexOf(".");
+        if (lastDotIndex < 0) {
+            return "";
+        }
+        return fileName.substring(lastDotIndex);
     }
 
     public static File multipartFileToFile(MultipartFile multipartFile) {
@@ -47,6 +57,9 @@ public class FileUtil {
         try {
             String originalFilename = multipartFile.getOriginalFilename();
             String[] filename = Objects.requireNonNull(originalFilename).split("\\.");
+            if (filename.length < 2) {
+                return null;
+            }
             file = File.createTempFile(filename[0], filename[1]);
             multipartFile.transferTo(file);
             file.deleteOnExit();
@@ -54,21 +67,6 @@ public class FileUtil {
             log.error("MultipartFile 转临时文件失败", e);
         }
         return file;
-    }
-
-
-    private static double getAccuracy(long size) {
-        double accuracy;
-        if (size < 900) {
-            accuracy = 0.85;
-        } else if (size < 2048) {
-            accuracy = 0.6;
-        } else if (size < 3072) {
-            accuracy = 0.44;
-        } else {
-            accuracy = 0.4;
-        }
-        return accuracy;
     }
 
 }

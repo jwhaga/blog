@@ -8,10 +8,12 @@ import com.aurora.quartz.QuartzDisallowConcurrentExecution;
 import com.aurora.quartz.QuartzJobExecution;
 import org.quartz.*;
 
+import java.util.Objects;
+
 public class ScheduleUtil {
 
     private static Class<? extends org.quartz.Job> getQuartzJobClass(Job job) {
-        boolean isConcurrent = Integer.valueOf(1).equals(job.getConcurrent());
+        boolean isConcurrent = Objects.equals(1, job.getConcurrent());
         return isConcurrent ? QuartzJobExecution.class : QuartzDisallowConcurrentExecution.class;
     }
 

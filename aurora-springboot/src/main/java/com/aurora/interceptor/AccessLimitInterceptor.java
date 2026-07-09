@@ -22,7 +22,6 @@ import static com.aurora.constant.CommonConstant.APPLICATION_JSON;
 
 @Slf4j
 @Component
-@SuppressWarnings("all")
 public class AccessLimitInterceptor implements HandlerInterceptor {
 
     @Autowired
@@ -41,12 +40,12 @@ public class AccessLimitInterceptor implements HandlerInterceptor {
                     long q = redisService.incrExpire(key, seconds);
                     if (q > maxCount) {
                         render(httpServletResponse, ResultVO.fail("请求过于频繁，" + seconds + "秒后再试"));
-                        log.warn(key + "请求次数超过每" + seconds + "秒" + maxCount + "次");
+                        log.warn("{} 请求次数超过每{}秒{}次", key, seconds, maxCount);
                         return false;
                     }
                     return true;
                 } catch (RedisConnectionFailureException e) {
-                    log.warn("redis错误: " + e.getMessage());
+                    log.warn("redis错误", e);
                     return false;
                 }
             }

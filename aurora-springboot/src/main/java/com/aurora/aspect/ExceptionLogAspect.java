@@ -36,34 +36,56 @@ public class ExceptionLogAspect {
     @AfterThrowing(value = "exceptionLogPointcut()", throwing = "e")
     public void saveExceptionLog(JoinPoint joinPoint, Exception e) {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        HttpServletRequest request = (HttpServletRequest) Objects.requireNonNull(requestAttributes).resolveReference(RequestAttributes.REFERENCE_REQUEST);
+        if (requestAttributes == null) {
+            return;
+        }
+        HttpServletRequest request = (HttpServletRequest) requestAttributes.resolveReference(RequestAttributes.REFERENCE_REQUEST);
+        if (request == null) {
+            return;
+        }
         ExceptionLog exceptionLog = new ExceptionLog();
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
         Operation operation = method.getAnnotation(Operation.class);
-        exceptionLog.setOptUri(Objects.requireNonNull(request).getRequestURI());
-        String className = joinPoint.getTarget().getClass().getName();
-        String methodName = method.getName();
-        methodName = className + "." + methodName;
-        exceptionLog.setOptMethod(methodName);
-        exceptionLog.setRequestMethod(Objects.requireNonNull(request).getMethod());
-        if (joinPoint.getArgs().length > 0) {
-            if (joinPoint.getArgs()[0] instanceof MultipartFile) {
-                exceptionLog.setRequestParam("file");
-            } else {
-                exceptionLog.setRequestParam(JSON.toJSONString(joinPoint.getArgs()));
-            }
-        }
+        exceptionLog.setOptUri(request.getRequestURI());
+        exceptionLog.setOptMethod(buildFullMethodName(joinPoint));
+        exceptionLog.setRequestMethod(request.getMethod());
+        exceptionLog.setRequestParam(getRequestArgs(joinPoint));
         if (Objects.nonNull(operation)) {
             exceptionLog.setOptDesc(operation.summary());
         } else {
             exceptionLog.setOptDesc("");
         }
         exceptionLog.setExceptionInfo(ExceptionUtil.getTrace(e));
-        String ipAddress = IpUtil.getIpAddress(request);
+        String ipAddress = getIpAddress(request);
         exceptionLog.setIpAddress(ipAddress);
         exceptionLog.setIpSource(IpUtil.getIpSource(ipAddress));
         applicationContext.publishEvent(new ExceptionLogEvent(exceptionLog));
+    }
+
+    private String buildFullMethodName(JoinPoint joinPoint) {
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Method method = signature.getMethod();
+        String className = joinPoint.getTarget().getClass().getName();
+        String methodName = method.getName();
+        return className + "." + methodName;
+    }
+
+    private String getRequestArgs(JoinPoint joinPoint) {
+        Object[] args = joinPoint.getArgs();
+        if (args.length == 0) {
+            return null;
+        }
+        for (Object arg : args) {
+            if (arg instanceof MultipartFile) {
+                return "file";
+            }
+        }
+        return JSON.toJSONString(args);
+    }
+
+    private String getIpAddress(HttpServletRequest request) {
+        return IpUtil.getIpAddress(request);
     }
 
 }

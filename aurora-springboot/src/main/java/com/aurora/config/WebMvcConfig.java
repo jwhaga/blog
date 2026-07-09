@@ -25,6 +25,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // Note: Spring 6.x does not allow allowCredentials(true) + allowedOrigins("*") simultaneously.
         registry.addMapping("/**")
                 .allowCredentials(true)
+                // 开发环境使用通配符 "*" 便于调试；生产环境应将 allowedOriginPatterns 改为具体域名（如 https://yourdomain.com）
                 .allowedHeaders("*")
                 .allowedOriginPatterns("*")
                 .allowedMethods("*");

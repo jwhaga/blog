@@ -15,6 +15,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class FilterInvocationSecurityMetadataSourceImpl implements FilterInvocationSecurityMetadataSource {
@@ -24,6 +25,8 @@ public class FilterInvocationSecurityMetadataSourceImpl implements FilterInvocat
     private RoleMapper roleMapper;
 
     private static List<ResourceRoleDTO> resourceRoleList;
+
+    private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
     @PostConstruct
     private void loadResourceRoleList() {
@@ -49,9 +52,8 @@ public class FilterInvocationSecurityMetadataSourceImpl implements FilterInvocat
         }
         String method = request.getMethod();
         String url = request.getRequestURI();
-        AntPathMatcher antPathMatcher = new AntPathMatcher();
         for (ResourceRoleDTO resourceRoleDTO : resourceRoleList) {
-            if (antPathMatcher.match(resourceRoleDTO.getUrl(), url) && resourceRoleDTO.getRequestMethod().equals(method)) {
+            if (antPathMatcher.match(resourceRoleDTO.getUrl(), url) && Objects.equals(resourceRoleDTO.getRequestMethod(), method)) {
                 List<String> roleList = resourceRoleDTO.getRoleList();
                 if (CollectionUtils.isEmpty(roleList)) {
                     return SecurityConfig.createList("disable");

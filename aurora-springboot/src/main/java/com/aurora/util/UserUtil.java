@@ -10,7 +10,11 @@ import org.springframework.stereotype.Component;
 public class UserUtil {
 
     public static UserDetailsDTO getUserDetailsDTO() {
-        return (UserDetailsDTO) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return null;
+        }
+        return (UserDetailsDTO) authentication.getPrincipal();
     }
 
     public static Authentication getAuthentication() {

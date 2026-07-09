@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 
 @Component
-@SuppressWarnings("all")
 public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextAware {
 
     private static ConfigurableListableBeanFactory beanFactory;

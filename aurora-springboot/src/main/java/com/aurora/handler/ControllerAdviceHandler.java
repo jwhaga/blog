@@ -3,6 +3,7 @@ package com.aurora.handler;
 import com.aurora.enums.StatusCodeEnum;
 import com.aurora.exception.BizException;
 import com.aurora.model.vo.ResultVO;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindException;
@@ -15,8 +16,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-
-import java.util.Objects;
 
 @Slf4j
 @RestControllerAdvice
@@ -31,7 +30,7 @@ public class ControllerAdviceHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResultVO<?> handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
         FieldError fieldError = e.getBindingResult().getFieldError();
-        String message = Objects.requireNonNull(fieldError).getDefaultMessage();
+        String message = fieldError != null ? fieldError.getDefaultMessage() : StatusCodeEnum.VALID_ERROR.getDesc();
         log.warn("参数校验失败(MethodArgumentNotValid): {}", message);
         return ResultVO.fail(StatusCodeEnum.VALID_ERROR.getCode(), message);
     }
@@ -39,7 +38,7 @@ public class ControllerAdviceHandler {
     @ExceptionHandler(BindException.class)
     public ResultVO<?> handleBindException(BindException e) {
         FieldError fieldError = e.getBindingResult().getFieldError();
-        String message = Objects.requireNonNull(fieldError).getDefaultMessage();
+        String message = fieldError != null ? fieldError.getDefaultMessage() : StatusCodeEnum.VALID_ERROR.getDesc();
         log.warn("参数绑定失败(BindException): {}", message);
         return ResultVO.fail(StatusCodeEnum.VALID_ERROR.getCode(), message);
     }
@@ -47,7 +46,7 @@ public class ControllerAdviceHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     public ResultVO<?> handleConstraintViolation(ConstraintViolationException e) {
         String message = e.getConstraintViolations().stream()
-                .map(v -> v.getMessage())
+                .map(ConstraintViolation::getMessage)
                 .findFirst()
                 .orElse(StatusCodeEnum.VALID_ERROR.getDesc());
         log.warn("参数校验失败(ConstraintViolation): {}", message);

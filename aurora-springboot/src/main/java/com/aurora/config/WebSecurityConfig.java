@@ -23,6 +23,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class WebSecurityConfig {
 
+    private static final String LOGIN_PROCESSING_URL = "/users/login";
+
     @Autowired
     private AuthenticationEntryPoint authenticationEntryPoint;
 
@@ -54,7 +56,7 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.formLogin(form -> form
-                .loginProcessingUrl("/users/login")
+                .loginProcessingUrl(LOGIN_PROCESSING_URL)
                 .successHandler(authenticationSuccessHandler)
                 .failureHandler(authenticationFailureHandler));
         http.authorizeHttpRequests(auth -> auth

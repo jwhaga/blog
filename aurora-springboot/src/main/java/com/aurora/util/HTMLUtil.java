@@ -1,21 +1,6 @@
 package com.aurora.util;
 
-import com.github.houbb.sensitive.word.bs.SensitiveWordBs;
-
 public class HTMLUtil {
-
-    // temporary unused
-    private static final SensitiveWordBs sensitiveWordBs = SensitiveWordBs.newInstance()
-            .ignoreCase(true)
-            .ignoreWidth(true)
-            .ignoreNumStyle(true)
-            .ignoreChineseStyle(true)
-            .ignoreEnglishStyle(true)
-            .ignoreRepeat(true)
-            .enableNumCheck(false)
-            .enableEmailCheck(false)
-            .enableUrlCheck(false)
-            .init();
 
     public static String filter(String source) {
         source = source.replaceAll("(?!<(img).*?>)<.*?>", "")

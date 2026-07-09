@@ -1,6 +1,7 @@
 package com.aurora.util;
 
 import com.aurora.constant.CommonConstant;
+import com.aurora.exception.BizException;
 import eu.bitwalker.useragentutils.UserAgent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -28,21 +29,14 @@ public class IpUtil {
     private static Method method;
 
     public static String getIpAddress(HttpServletRequest request) {
-        String ipAddress = request.getHeader("X-Real-IP");
-        if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
-            ipAddress = request.getHeader("x-forwarded-for");
-        }
-        if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
-            ipAddress = request.getHeader("Proxy-Client-IP");
-        }
-        if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
-            ipAddress = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
-            ipAddress = request.getHeader("HTTP_CLIENT_IP");
-        }
-        if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
-            ipAddress = request.getHeader("HTTP_X_FORWARDED_FOR");
+        String[] headerNames = {"X-Real-IP", "x-forwarded-for", "Proxy-Client-IP",
+                "WL-Proxy-Client-IP", "HTTP_CLIENT_IP", "HTTP_X_FORWARDED_FOR"};
+        String ipAddress = null;
+        for (String headerName : headerNames) {
+            ipAddress = request.getHeader(headerName);
+            if (ipAddress != null && ipAddress.length() != 0 && !"unknown".equalsIgnoreCase(ipAddress)) {
+                break;
+            }
         }
         if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
             ipAddress = request.getRemoteAddr();
@@ -54,7 +48,9 @@ public class IpUtil {
                 } catch (UnknownHostException e) {
                     log.error("getIpAddress exception:", e);
                 }
-                assert inet != null;
+                if (inet == null) {
+                    throw new BizException("无法获取本机 IP 地址");
+                }
                 ipAddress = inet.getHostAddress();
             }
         }

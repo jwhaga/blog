@@ -19,14 +19,13 @@ import java.io.IOException;
 import java.util.Objects;
 
 @Component
-@SuppressWarnings("all")
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     @Autowired
-    public TokenService tokenService;
+    private TokenService tokenService;
 
     @Autowired
-    public AuthenticationEntryPoint authenticationEntryPoint;
+    private AuthenticationEntryPoint authenticationEntryPoint;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
