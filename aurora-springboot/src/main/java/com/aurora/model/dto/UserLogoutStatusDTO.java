@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserLogoutStatusDTO {
 
-    private String Message;
+    private String message;
 }

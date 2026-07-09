@@ -46,7 +46,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
     @Autowired
     private FilterInvocationSecurityMetadataSourceImpl filterInvocationSecurityMetadataSource;
 
-    @SuppressWarnings("all")
+    @SuppressWarnings("unchecked")
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void importSwagger() {

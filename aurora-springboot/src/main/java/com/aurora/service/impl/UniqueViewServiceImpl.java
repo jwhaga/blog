@@ -16,12 +16,14 @@ import java.util.List;
 @Service
 public class UniqueViewServiceImpl extends ServiceImpl<UniqueViewMapper, UniqueView> implements UniqueViewService {
 
+    private static final int RECENT_DAYS = 7;
+
     @Autowired
     private UniqueViewMapper uniqueViewMapper;
 
     @Override
     public List<UniqueViewDTO> listUniqueViews() {
-        DateTime startTime = DateUtil.beginOfDay(DateUtil.offsetDay(new Date(), -7));
+        DateTime startTime = DateUtil.beginOfDay(DateUtil.offsetDay(new Date(), -RECENT_DAYS));
         DateTime endTime = DateUtil.endOfDay(new Date());
         return uniqueViewMapper.listUniqueViews(startTime, endTime);
     }

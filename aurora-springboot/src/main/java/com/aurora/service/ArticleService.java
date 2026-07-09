@@ -1,12 +1,22 @@
 package com.aurora.service;
 
-import com.aurora.model.dto.*;
+import com.aurora.model.dto.ArchiveDTO;
+import com.aurora.model.dto.ArticleAdminDTO;
+import com.aurora.model.dto.ArticleAdminViewDTO;
+import com.aurora.model.dto.ArticleCardDTO;
+import com.aurora.model.dto.ArticleDTO;
+import com.aurora.model.dto.ArticleSearchDTO;
+import com.aurora.model.dto.PageResultDTO;
+import com.aurora.model.dto.TopAndFeaturedArticlesDTO;
 import com.aurora.entity.Article;
-import com.aurora.model.vo.*;
+import com.aurora.model.vo.ArticlePasswordVO;
+import com.aurora.model.vo.ArticleTopFeaturedVO;
+import com.aurora.model.vo.ArticleVO;
+import com.aurora.model.vo.ConditionVO;
+import com.aurora.model.vo.DeleteVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
-
 
 public interface ArticleService extends IService<Article> {
 

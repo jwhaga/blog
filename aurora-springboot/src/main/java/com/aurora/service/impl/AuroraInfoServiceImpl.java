@@ -1,9 +1,28 @@
 package com.aurora.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.aurora.model.dto.*;
-import com.aurora.entity.*;
-import com.aurora.mapper.*;
+import com.aurora.enums.CommentTypeEnum;
+import com.aurora.model.dto.AboutDTO;
+import com.aurora.model.dto.ArticleRankDTO;
+import com.aurora.model.dto.ArticleStatisticsDTO;
+import com.aurora.model.dto.AuroraAdminInfoDTO;
+import com.aurora.model.dto.AuroraHomeInfoDTO;
+import com.aurora.model.dto.CategoryDTO;
+import com.aurora.model.dto.TagDTO;
+import com.aurora.model.dto.UniqueViewDTO;
+import com.aurora.model.dto.WebsiteConfigDTO;
+import com.aurora.entity.About;
+import com.aurora.entity.Article;
+import com.aurora.entity.Comment;
+import com.aurora.entity.WebsiteConfig;
+import com.aurora.mapper.AboutMapper;
+import com.aurora.mapper.ArticleMapper;
+import com.aurora.mapper.CategoryMapper;
+import com.aurora.mapper.CommentMapper;
+import com.aurora.mapper.TagMapper;
+import com.aurora.mapper.TalkMapper;
+import com.aurora.mapper.UserInfoMapper;
+import com.aurora.mapper.WebsiteConfigMapper;
 import com.aurora.service.AuroraInfoService;
 import com.aurora.service.RedisService;
 import com.aurora.service.UniqueViewService;
@@ -24,15 +43,30 @@ import org.springframework.util.DigestUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static com.aurora.constant.CommonConstant.*;
-import static com.aurora.constant.RedisConstant.*;
+import static com.aurora.constant.CommonConstant.DEFAULT_ABOUT_ID;
+import static com.aurora.constant.CommonConstant.DEFAULT_CONFIG_ID;
+import static com.aurora.constant.CommonConstant.FALSE;
+import static com.aurora.constant.CommonConstant.UNKNOWN;
+import static com.aurora.constant.RedisConstant.ABOUT;
+import static com.aurora.constant.RedisConstant.ARTICLE_VIEWS_COUNT;
+import static com.aurora.constant.RedisConstant.BLOG_VIEWS_COUNT;
+import static com.aurora.constant.RedisConstant.UNIQUE_VISITOR;
+import static com.aurora.constant.RedisConstant.VISITOR_AREA;
+import static com.aurora.constant.RedisConstant.WEBSITE_CONFIG;
 
 @Service
 public class AuroraInfoServiceImpl implements AuroraInfoService {
+
+    private static final int TOP_ARTICLE_COUNT = 5;
 
     @Autowired
     private WebsiteConfigMapper websiteConfigMapper;
@@ -112,7 +146,7 @@ public class AuroraInfoServiceImpl implements AuroraInfoService {
     public AuroraAdminInfoDTO getAuroraAdminInfo() {
         Object count = redisService.get(BLOG_VIEWS_COUNT);
         Long viewsCount = Long.parseLong(Optional.ofNullable(count).orElse(0).toString());
-        Long messageCount = commentMapper.selectCount(new LambdaQueryWrapper<Comment>().eq(Comment::getType, 2));
+        Long messageCount = commentMapper.selectCount(new LambdaQueryWrapper<Comment>().eq(Comment::getType, CommentTypeEnum.MESSAGE.getType()));
         Long userCount = userInfoMapper.selectCount(null);
         Long articleCount = articleMapper.selectCount(new LambdaQueryWrapper<Article>()
                 .eq(Article::getIsDelete, FALSE));
@@ -120,7 +154,7 @@ public class AuroraInfoServiceImpl implements AuroraInfoService {
         List<ArticleStatisticsDTO> articleStatisticsDTOs = articleMapper.listArticleStatistics();
         List<CategoryDTO> categoryDTOs = categoryMapper.listCategories();
         List<TagDTO> tagDTOs = BeanCopyUtil.copyList(tagMapper.selectList(null), TagDTO.class);
-        Map<Object, Double> articleMap = redisService.zReverseRangeWithScore(ARTICLE_VIEWS_COUNT, 0, 4);
+        Map<Object, Double> articleMap = redisService.zReverseRangeWithScore(ARTICLE_VIEWS_COUNT, 0, TOP_ARTICLE_COUNT - 1);
         AuroraAdminInfoDTO auroraAdminInfoDTO = AuroraAdminInfoDTO.builder()
                 .articleStatisticsDTOs(articleStatisticsDTOs)
                 .tagDTOs(tagDTOs)

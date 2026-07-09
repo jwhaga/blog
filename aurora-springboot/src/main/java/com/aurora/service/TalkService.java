@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
-
 public interface TalkService extends IService<Talk> {
 
     PageResultDTO<TalkDTO> listTalks();

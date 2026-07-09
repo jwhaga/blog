@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AboutDTO {
 
-    private String Content;
+    private String content;
 
 }

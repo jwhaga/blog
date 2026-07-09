@@ -9,6 +9,9 @@ import java.util.List;
 @Repository
 public interface JobLogMapper extends BaseMapper<JobLog> {
 
+    /**
+     * 查询所有任务日志分组
+     */
     List<String> listJobLogGroups();
 
 }

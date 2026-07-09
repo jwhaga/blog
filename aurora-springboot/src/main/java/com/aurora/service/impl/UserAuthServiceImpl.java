@@ -2,7 +2,12 @@ package com.aurora.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.aurora.constant.CommonConstant;
-import com.aurora.model.dto.*;
+import com.aurora.model.dto.EmailDTO;
+import com.aurora.model.dto.PageResultDTO;
+import com.aurora.model.dto.UserAdminDTO;
+import com.aurora.model.dto.UserAreaDTO;
+import com.aurora.model.dto.UserInfoDTO;
+import com.aurora.model.dto.UserLogoutStatusDTO;
 import com.aurora.entity.UserAuth;
 import com.aurora.entity.UserInfo;
 import com.aurora.entity.UserRole;
@@ -19,7 +24,10 @@ import com.aurora.service.UserAuthService;
 import com.aurora.strategy.context.SocialLoginStrategyContext;
 import com.aurora.util.PageUtil;
 import com.aurora.util.UserUtil;
-import com.aurora.model.vo.*;
+import com.aurora.model.vo.ConditionVO;
+import com.aurora.model.vo.PasswordVO;
+import com.aurora.model.vo.QQLoginVO;
+import com.aurora.model.vo.UserVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
@@ -31,11 +39,18 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.aurora.constant.RabbitMQConstant.EMAIL_EXCHANGE;
-import static com.aurora.constant.RedisConstant.*;
+import static com.aurora.constant.RedisConstant.CODE_EXPIRE_TIME;
+import static com.aurora.constant.RedisConstant.USER_AREA;
+import static com.aurora.constant.RedisConstant.USER_CODE_KEY;
+import static com.aurora.constant.RedisConstant.VISITOR_AREA;
 import static com.aurora.enums.UserAreaTypeEnum.getUserAreaType;
 import static com.aurora.util.CommonUtil.checkEmail;
 import static com.aurora.util.CommonUtil.getRandomCode;
@@ -154,7 +169,6 @@ public class UserAuthServiceImpl implements UserAuthService {
     }
 
     @Override
-    @SuppressWarnings("all")
     public void updateAdminPassword(PasswordVO passwordVO) {
         UserAuth user = userAuthMapper.selectOne(new LambdaQueryWrapper<UserAuth>()
                 .eq(UserAuth::getId, UserUtil.getUserDetailsDTO().getId()));

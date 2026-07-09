@@ -12,7 +12,10 @@ import com.aurora.util.BeanCopyUtil;
 import com.aurora.util.CronUtil;
 import com.aurora.util.PageUtil;
 import com.aurora.util.ScheduleUtil;
-import com.aurora.model.vo.*;
+import com.aurora.model.vo.JobRunVO;
+import com.aurora.model.vo.JobSearchVO;
+import com.aurora.model.vo.JobStatusVO;
+import com.aurora.model.vo.JobVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -159,7 +162,7 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         Assert.isTrue(valid, "Cron表达式无效!");
     }
 
-    public void updateSchedulerJob(Job job, String jobGroup) {
+    private void updateSchedulerJob(Job job, String jobGroup) {
         Integer jobId = job.getId();
         JobKey jobKey = ScheduleUtil.getJobKey(jobId, jobGroup);
         try {

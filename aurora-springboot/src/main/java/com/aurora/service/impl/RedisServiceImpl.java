@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 
 
 @Service
-@SuppressWarnings("all")
 public class RedisServiceImpl implements RedisService {
 
     @Autowired

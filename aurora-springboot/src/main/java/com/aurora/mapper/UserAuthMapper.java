@@ -9,12 +9,17 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-
 @Repository
 public interface UserAuthMapper extends BaseMapper<UserAuth> {
 
+    /**
+     * 后台分页查询用户列表
+     */
     List<UserAdminDTO> listUsers(@Param("current") Long current, @Param("size") Long size, @Param("conditionVO") ConditionVO conditionVO);
 
+    /**
+     * 后台统计符合条件的用户数量
+     */
     Long countUser(@Param("conditionVO") ConditionVO conditionVO);
 
 }

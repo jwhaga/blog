@@ -1,7 +1,6 @@
 package com.aurora.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.aurora.model.dto.*;
 import com.aurora.entity.Article;
 import com.aurora.entity.Comment;
 import com.aurora.entity.Talk;
@@ -12,15 +11,20 @@ import com.aurora.mapper.ArticleMapper;
 import com.aurora.mapper.CommentMapper;
 import com.aurora.mapper.TalkMapper;
 import com.aurora.mapper.UserInfoMapper;
+import com.aurora.model.dto.CommentAdminDTO;
+import com.aurora.model.dto.CommentDTO;
+import com.aurora.model.dto.EmailDTO;
+import com.aurora.model.dto.PageResultDTO;
+import com.aurora.model.dto.ReplyDTO;
+import com.aurora.model.dto.WebsiteConfigDTO;
+import com.aurora.model.vo.CommentVO;
+import com.aurora.model.vo.ConditionVO;
+import com.aurora.model.vo.ReviewVO;
 import com.aurora.service.AuroraInfoService;
 import com.aurora.service.CommentService;
 import com.aurora.util.HTMLUtil;
 import com.aurora.util.PageUtil;
 import com.aurora.util.UserUtil;
-import com.aurora.model.vo.CommentVO;
-import com.aurora.model.vo.ConditionVO;
-import com.aurora.model.dto.PageResultDTO;
-import com.aurora.model.vo.ReviewVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -34,16 +38,40 @@ import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static com.aurora.constant.CommonConstant.*;
+import static com.aurora.constant.CommonConstant.BLOGGER_USER_INFO_ID;
+import static com.aurora.constant.CommonConstant.CHECK_REMIND_SUBJECT;
+import static com.aurora.constant.CommonConstant.COMMENT_REMIND_SUBJECT;
+import static com.aurora.constant.CommonConstant.FALSE;
+import static com.aurora.constant.CommonConstant.MENTION_REMIND_SUBJECT;
+import static com.aurora.constant.CommonConstant.TRUE;
 import static com.aurora.constant.RabbitMQConstant.EMAIL_EXCHANGE;
-import static com.aurora.enums.CommentTypeEnum.*;
+import static com.aurora.enums.CommentTypeEnum.ABOUT;
+import static com.aurora.enums.CommentTypeEnum.ARTICLE;
+import static com.aurora.enums.CommentTypeEnum.LINK;
+import static com.aurora.enums.CommentTypeEnum.MESSAGE;
+import static com.aurora.enums.CommentTypeEnum.TALK;
+import static com.aurora.enums.CommentTypeEnum.getCommentEnum;
+import static com.aurora.enums.CommentTypeEnum.getCommentPath;
 
 @Service
 public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> implements CommentService {
+
+    private static final String PARAM_VALIDATE_ERROR = "参数校验异常";
+
+    private static final String NEW_REPLY_REMIND_CONTENT = "您收到了一条新的回复，请前往后台管理页面审核";
+
+    private static final String LINK_COLOR = "#12addb";
+
+    private static final List<Integer> COMMENT_TYPES = new ArrayList<>();
 
     @Value("${website.url}")
     private String websiteUrl;
@@ -66,13 +94,11 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    private static final List<Integer> types = new ArrayList<>();
-
     @PostConstruct
     public void init() {
         CommentTypeEnum[] values = CommentTypeEnum.values();
         for (CommentTypeEnum value : values) {
-            types.add(value.getType());
+            COMMENT_TYPES.add(value.getType());
         }
     }
 
@@ -149,59 +175,55 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         this.updateBatchById(comments);
     }
 
-    public void checkCommentVO(CommentVO commentVO) {
-        if (!types.contains(commentVO.getType())) {
-            throw new BizException("参数校验异常");
+    private void checkCommentVO(CommentVO commentVO) {
+        if (!COMMENT_TYPES.contains(commentVO.getType())) {
+            throw new BizException(PARAM_VALIDATE_ERROR);
         }
-        if (Objects.requireNonNull(getCommentEnum(commentVO.getType())) == ARTICLE || Objects.requireNonNull(getCommentEnum(commentVO.getType())) == TALK) {
+        CommentTypeEnum commentTypeEnum = getCommentEnum(commentVO.getType());
+        if (commentTypeEnum == ARTICLE || commentTypeEnum == TALK) {
             if (Objects.isNull(commentVO.getTopicId())) {
-                throw new BizException("参数校验异常");
-            } else {
-                if (Objects.requireNonNull(getCommentEnum(commentVO.getType())) == ARTICLE) {
-                    Article article = articleMapper.selectOne(new LambdaQueryWrapper<Article>().select(Article::getId, Article::getUserId).eq(Article::getId, commentVO.getTopicId()));
-                    if (Objects.isNull(article)) {
-                        throw new BizException("参数校验异常");
-                    }
+                throw new BizException(PARAM_VALIDATE_ERROR);
+            }
+            if (commentTypeEnum == ARTICLE) {
+                Article article = articleMapper.selectOne(new LambdaQueryWrapper<Article>().select(Article::getId, Article::getUserId).eq(Article::getId, commentVO.getTopicId()));
+                if (Objects.isNull(article)) {
+                    throw new BizException(PARAM_VALIDATE_ERROR);
                 }
-                if (Objects.requireNonNull(getCommentEnum(commentVO.getType())) == TALK) {
-                    Talk talk = talkMapper.selectOne(new LambdaQueryWrapper<Talk>().select(Talk::getId, Talk::getUserId).eq(Talk::getId, commentVO.getTopicId()));
-                    if (Objects.isNull(talk)) {
-                        throw new BizException("参数校验异常");
-                    }
+            }
+            if (commentTypeEnum == TALK) {
+                Talk talk = talkMapper.selectOne(new LambdaQueryWrapper<Talk>().select(Talk::getId, Talk::getUserId).eq(Talk::getId, commentVO.getTopicId()));
+                if (Objects.isNull(talk)) {
+                    throw new BizException(PARAM_VALIDATE_ERROR);
                 }
             }
         }
-        if (Objects.requireNonNull(getCommentEnum(commentVO.getType())) == LINK
-                || Objects.requireNonNull(getCommentEnum(commentVO.getType())) == ABOUT
-                || Objects.requireNonNull(getCommentEnum(commentVO.getType())) == MESSAGE) {
+        if (commentTypeEnum == LINK || commentTypeEnum == ABOUT || commentTypeEnum == MESSAGE) {
             if (Objects.nonNull(commentVO.getTopicId())) {
-                throw new BizException("参数校验异常");
+                throw new BizException(PARAM_VALIDATE_ERROR);
             }
         }
         if (Objects.isNull(commentVO.getParentId())) {
             if (Objects.nonNull(commentVO.getReplyUserId())) {
-                throw new BizException("参数校验异常");
+                throw new BizException(PARAM_VALIDATE_ERROR);
             }
+            return;
         }
-        if (Objects.nonNull(commentVO.getParentId())) {
-            Comment parentComment = commentMapper.selectOne(new LambdaQueryWrapper<Comment>().select(Comment::getId, Comment::getParentId, Comment::getType).eq(Comment::getId, commentVO.getParentId()));
-            if (Objects.isNull(parentComment)) {
-                throw new BizException("参数校验异常");
-            }
-            if (Objects.nonNull(parentComment.getParentId())) {
-                throw new BizException("参数校验异常");
-            }
-            if (!commentVO.getType().equals(parentComment.getType())) {
-                throw new BizException("参数校验异常");
-            }
-            if (Objects.isNull(commentVO.getReplyUserId())) {
-                throw new BizException("参数校验异常");
-            } else {
-                UserInfo existUser = userInfoMapper.selectOne(new LambdaQueryWrapper<UserInfo>().select(UserInfo::getId).eq(UserInfo::getId, commentVO.getReplyUserId()));
-                if (Objects.isNull(existUser)) {
-                    throw new BizException("参数校验异常");
-                }
-            }
+        Comment parentComment = commentMapper.selectOne(new LambdaQueryWrapper<Comment>().select(Comment::getId, Comment::getParentId, Comment::getType).eq(Comment::getId, commentVO.getParentId()));
+        if (Objects.isNull(parentComment)) {
+            throw new BizException(PARAM_VALIDATE_ERROR);
+        }
+        if (Objects.nonNull(parentComment.getParentId())) {
+            throw new BizException(PARAM_VALIDATE_ERROR);
+        }
+        if (!commentVO.getType().equals(parentComment.getType())) {
+            throw new BizException(PARAM_VALIDATE_ERROR);
+        }
+        if (Objects.isNull(commentVO.getReplyUserId())) {
+            throw new BizException(PARAM_VALIDATE_ERROR);
+        }
+        UserInfo existUser = userInfoMapper.selectOne(new LambdaQueryWrapper<UserInfo>().select(UserInfo::getId).eq(UserInfo::getId, commentVO.getReplyUserId()));
+        if (Objects.isNull(existUser)) {
+            throw new BizException(PARAM_VALIDATE_ERROR);
         }
     }
 
@@ -228,7 +250,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                 String url = websiteUrl + getCommentPath(comment.getType()) + topicId;
                 map.put("content", userInfo.getNickname() + "在" + Objects.requireNonNull(getCommentEnum(comment.getType())).getDesc()
                         + "的评论区@了你，"
-                        + "<a style=\"text-decoration:none;color:#12addb\" href=\"" + url + "\">点击查看</a>");
+                        + "<a style=\"text-decoration:none;color:" + LINK_COLOR + "\" href=\"" + url + "\">点击查看</a>");
                 EmailDTO emailDTO = EmailDTO.builder()
                         .email(replyUserinfo.getEmail())
                         .subject(MENTION_REMIND_SUBJECT)
@@ -244,26 +266,29 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         String title;
         Integer userId = BLOGGER_USER_INFO_ID;
         String topicId = Objects.nonNull(comment.getTopicId()) ? comment.getTopicId().toString() : "";
+        CommentTypeEnum commentTypeEnum = getCommentEnum(comment.getType());
         if (Objects.nonNull(comment.getReplyUserId())) {
             userId = comment.getReplyUserId();
         } else {
-            switch (Objects.requireNonNull(getCommentEnum(comment.getType()))) {
+            switch (Objects.requireNonNull(commentTypeEnum)) {
                 case ARTICLE:
                     userId = articleMapper.selectById(comment.getTopicId()).getUserId();
                     break;
                 case TALK:
                     userId = talkMapper.selectById(comment.getTopicId()).getUserId();
+                    break;
                 default:
                     break;
             }
         }
-        if (Objects.requireNonNull(getCommentEnum(comment.getType())).equals(ARTICLE)) {
-            title = articleMapper.selectById(comment.getTopicId()).getArticleTitle();
+        if (commentTypeEnum == ARTICLE) {
+            Article article = articleMapper.selectById(comment.getTopicId());
+            title = Objects.nonNull(article) ? article.getArticleTitle() : commentTypeEnum.getDesc();
         } else {
-            title = Objects.requireNonNull(getCommentEnum(comment.getType())).getDesc();
+            title = commentTypeEnum.getDesc();
         }
         UserInfo userInfo = userInfoMapper.selectById(userId);
-        if (StringUtils.isNotBlank(userInfo.getEmail())) {
+        if (Objects.nonNull(userInfo) && StringUtils.isNotBlank(userInfo.getEmail())) {
             EmailDTO emailDTO = getEmailDTO(comment, userInfo, fromNickname, topicId, title);
             rabbitTemplate.convertAndSend(EMAIL_EXCHANGE, "*", new Message(JSON.toJSONBytes(emailDTO), new MessageProperties()));
         }
@@ -286,6 +311,10 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                 map.put("content", comment.getCommentContent());
             } else {
                 Comment parentComment = commentMapper.selectOne(new LambdaQueryWrapper<Comment>().select(Comment::getUserId, Comment::getCommentContent, Comment::getCreateTime).eq(Comment::getId, comment.getParentId()));
+                if (Objects.isNull(parentComment)) {
+                    emailDTO.setCommentMap(map);
+                    return emailDTO;
+                }
                 if (!userInfo.getId().equals(parentComment.getUserId())) {
                     userInfo = userInfoMapper.selectById(parentComment.getUserId());
                 }
@@ -302,7 +331,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                 if (!comment.getReplyUserId().equals(parentComment.getUserId())) {
                     UserInfo mentionUserInfo = userInfoMapper.selectById(comment.getReplyUserId());
                     if (Objects.nonNull(mentionUserInfo.getWebsite())) {
-                        map.put("replyComment", "<a style=\"text-decoration:none;color:#12addb\" href=\""
+                        map.put("replyComment", "<a style=\"text-decoration:none;color:" + LINK_COLOR + "\" href=\""
                                 + mentionUserInfo.getWebsite()
                                 + "\">@" + mentionUserInfo.getNickname() + " " + "</a>" + parentComment.getCommentContent());
                     } else {
@@ -317,7 +346,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             emailDTO.setEmail(adminEmail);
             emailDTO.setSubject(CHECK_REMIND_SUBJECT);
             emailDTO.setTemplate("common.html");
-            map.put("content", "您收到了一条新的回复，请前往后台管理页面审核");
+            map.put("content", NEW_REPLY_REMIND_CONTENT);
         }
         emailDTO.setCommentMap(map);
         return emailDTO;

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@SuppressWarnings("all")
 public interface RedisService {
 
     void set(String key, Object value, long time);

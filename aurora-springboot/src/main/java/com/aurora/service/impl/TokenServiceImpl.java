@@ -21,12 +21,19 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.aurora.constant.AuthConstant.*;
+import static com.aurora.constant.AuthConstant.CAPTCHA_EXPIRE_MINUTES;
+import static com.aurora.constant.AuthConstant.TOKEN_EXPIRE_SECONDS;
+import static com.aurora.constant.AuthConstant.TOKEN_HEADER;
+import static com.aurora.constant.AuthConstant.TOKEN_PREFIX;
 import static com.aurora.constant.RedisConstant.LOGIN_USER;
 
 
 @Service
 public class TokenServiceImpl implements TokenService {
+
+    private static final String ISSUER = "huaweimian";
+
+    private static final String HASH_ALGORITHM = "SHA-256";
 
     @Value("${jwt.secret}")
     private String secret;
@@ -43,9 +50,9 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public String createToken(String subject) {
-        SecretKey secretKey = generalKey();
+        SecretKey secretKey = generateKey();
         return Jwts.builder().id(getUuid()).subject(subject)
-                .issuer("huaweimian")
+                .issuer(ISSUER)
                 .signWith(secretKey, Jwts.SIG.HS256)
                 .compact();
     }
@@ -69,7 +76,7 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public Claims parseToken(String token) {
-        SecretKey secretKey = generalKey();
+        SecretKey secretKey = generateKey();
         return Jwts.parser()
                 .verifyWith(secretKey)
                 .build()
@@ -80,6 +87,7 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public UserDetailsDTO getUserDetailDTO(HttpServletRequest request) {
         String token = Optional.ofNullable(request.getHeader(TOKEN_HEADER)).orElse("").replaceFirst(TOKEN_PREFIX, "");
+        // 此处字符串 "null" 是前端在某些异常场景下传回的字面量，并非 Java null，需按字面值比较
         if (StringUtils.hasText(token) && !token.equals("null")) {
             Claims claims = parseToken(token);
             String userId = claims.getSubject();
@@ -93,13 +101,13 @@ public class TokenServiceImpl implements TokenService {
         redisService.hDel(LOGIN_USER, String.valueOf(userId));
     }
 
-    public String getUuid() {
+    private String getUuid() {
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
 
-    public SecretKey generalKey() {
+    private SecretKey generateKey() {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            MessageDigest digest = MessageDigest.getInstance(HASH_ALGORITHM);
             byte[] encodedKey = digest.digest(secret.getBytes(StandardCharsets.UTF_8));
             return Keys.hmacShaKeyFor(encodedKey);
         } catch (NoSuchAlgorithmException e) {

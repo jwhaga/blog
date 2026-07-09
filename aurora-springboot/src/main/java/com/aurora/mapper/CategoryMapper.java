@@ -10,12 +10,17 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-
 @Repository
 public interface CategoryMapper extends BaseMapper<Category> {
 
+    /**
+     * 查询前台分类列表
+     */
     List<CategoryDTO> listCategories();
 
+    /**
+     * 后台分页查询分类列表
+     */
     List<CategoryAdminDTO> listCategoriesAdmin(@Param("current") Long current, @Param("size") Long size, @Param("conditionVO") ConditionVO conditionVO);
 
 }

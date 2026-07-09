@@ -12,6 +12,9 @@ import java.util.List;
 @Repository
 public interface UniqueViewMapper extends BaseMapper<UniqueView> {
 
+    /**
+     * 根据时间范围查询访客量统计列表
+     */
     List<UniqueViewDTO> listUniqueViews(@Param("startTime") Date startTime, @Param("endTime") Date endTime);
 
 }

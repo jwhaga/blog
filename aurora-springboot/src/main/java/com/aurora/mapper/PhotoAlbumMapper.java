@@ -12,6 +12,9 @@ import java.util.List;
 @Repository
 public interface PhotoAlbumMapper extends BaseMapper<PhotoAlbum> {
 
+    /**
+     * 后台分页查询相册列表
+     */
     List<PhotoAlbumAdminDTO> listPhotoAlbumsAdmin(@Param("current") Long current, @Param("size") Long size, @Param("condition") ConditionVO conditionVO);
 
 }

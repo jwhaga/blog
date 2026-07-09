@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ArchiveDTO {
 
-    private String Time;
+    private String time;
 
     private List<ArticleCardDTO> articles;
 }

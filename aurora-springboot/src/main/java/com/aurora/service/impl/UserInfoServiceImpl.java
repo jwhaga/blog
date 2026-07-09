@@ -18,7 +18,12 @@ import com.aurora.service.UserRoleService;
 import com.aurora.strategy.context.UploadStrategyContext;
 import com.aurora.util.BeanCopyUtil;
 import com.aurora.util.UserUtil;
-import com.aurora.model.vo.*;
+import com.aurora.model.vo.ConditionVO;
+import com.aurora.model.vo.EmailVO;
+import com.aurora.model.vo.SubscribeVO;
+import com.aurora.model.vo.UserDisableVO;
+import com.aurora.model.vo.UserInfoVO;
+import com.aurora.model.vo.UserRoleVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.lang3.StringUtils;
@@ -27,9 +32,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static com.aurora.constant.RedisConstant.LOGIN_USER;
 import static com.aurora.constant.RedisConstant.USER_CODE_KEY;
 import static com.aurora.util.PageUtil.getLimitCurrent;
 import static com.aurora.util.PageUtil.getSize;
@@ -142,7 +153,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
 
     @Override
     public PageResultDTO<UserOnlineDTO> listOnlineUsers(ConditionVO conditionVO) {
-        Map<String, Object> userMaps = redisService.hGetAll("login_user");
+        Map<String, Object> userMaps = redisService.hGetAll(LOGIN_USER);
         Collection<Object> values = userMaps.values();
         ArrayList<UserDetailsDTO> userDetailsDTOs = new ArrayList<>();
         for (Object value : values) {
