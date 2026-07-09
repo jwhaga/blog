@@ -3,6 +3,11 @@ package com.aurora.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * 系统状态码枚举。
+ * 前两位近似 HTTP 状态码语义：2xx 成功，4xx 客户端错误，5xx 服务端错误。
+ * 第三位为业务子码。
+ */
 @Getter
 @AllArgsConstructor
 public enum StatusCodeEnum {

@@ -78,7 +78,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         map.put("content", "您的验证码为 " + code + " 有效期15分钟，请不要告诉他人哦！");
         EmailDTO emailDTO = EmailDTO.builder()
                 .email(username)
-                .subject(CommonConstant.CAPTCHA)
+                .subject(CommonConstant.CAPTCHA_SUBJECT)
                 .template("common.html")
                 .commentMap(map)
                 .build();

@@ -19,6 +19,12 @@ public enum FileExtEnum {
 
     TXT(".txt", "txt文件");
 
+    /**
+     * 根据扩展名获取对应的枚举实例。
+     *
+     * @param extName 文件扩展名（大小写不敏感）
+     * @return 对应的枚举实例，未匹配时返回 null
+     */
     public static FileExtEnum getFileExt(String extName) {
         for (FileExtEnum value : FileExtEnum.values()) {
             if (value.getExtName().equalsIgnoreCase(extName)) {

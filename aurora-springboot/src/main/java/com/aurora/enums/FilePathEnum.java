@@ -17,7 +17,7 @@ public enum FilePathEnum {
 
     CONFIG("aurora/config/", "配置图片路径"),
 
-    TALK("aurora/talks/", "配置图片路径"),
+    TALK("aurora/talks/", "说说图片路径"),
 
     MD("aurora/markdown/", "md文件路径");
 

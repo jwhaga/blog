@@ -214,7 +214,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                 }
             }
         }
-        if (comment.getUserId().equals(BLOGGER_ID) && Objects.isNull(comment.getParentId())) {
+        if (comment.getUserId().equals(BLOGGER_USER_INFO_ID) && Objects.isNull(comment.getParentId())) {
             return;
         }
         if (Objects.nonNull(comment.getParentId())) {
@@ -231,7 +231,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                         + "<a style=\"text-decoration:none;color:#12addb\" href=\"" + url + "\">点击查看</a>");
                 EmailDTO emailDTO = EmailDTO.builder()
                         .email(replyUserinfo.getEmail())
-                        .subject(MENTION_REMIND)
+                        .subject(MENTION_REMIND_SUBJECT)
                         .template("common.html")
                         .commentMap(map)
                         .build();
@@ -242,7 +242,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             }
         }
         String title;
-        Integer userId = BLOGGER_ID;
+        Integer userId = BLOGGER_USER_INFO_ID;
         String topicId = Objects.nonNull(comment.getTopicId()) ? comment.getTopicId().toString() : "";
         if (Objects.nonNull(comment.getReplyUserId())) {
             userId = comment.getReplyUserId();
@@ -276,7 +276,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             String url = websiteUrl + getCommentPath(comment.getType()) + topicId;
             if (Objects.isNull(comment.getParentId())) {
                 emailDTO.setEmail(userInfo.getEmail());
-                emailDTO.setSubject(COMMENT_REMIND);
+                emailDTO.setSubject(COMMENT_REMIND_SUBJECT);
                 emailDTO.setTemplate("owner.html");
                 String createTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(comment.getCreateTime());
                 map.put("time", createTime);
@@ -290,7 +290,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                     userInfo = userInfoMapper.selectById(parentComment.getUserId());
                 }
                 emailDTO.setEmail(userInfo.getEmail());
-                emailDTO.setSubject(COMMENT_REMIND);
+                emailDTO.setSubject(COMMENT_REMIND_SUBJECT);
                 emailDTO.setTemplate("user.html");
                 map.put("url", url);
                 map.put("title", title);
@@ -313,9 +313,9 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                 }
             }
         } else {
-            String adminEmail = userInfoMapper.selectById(BLOGGER_ID).getEmail();
+            String adminEmail = userInfoMapper.selectById(BLOGGER_USER_INFO_ID).getEmail();
             emailDTO.setEmail(adminEmail);
-            emailDTO.setSubject(CHECK_REMIND);
+            emailDTO.setSubject(CHECK_REMIND_SUBJECT);
             emailDTO.setTemplate("common.html");
             map.put("content", "您收到了一条新的回复，请前往后台管理页面审核");
         }

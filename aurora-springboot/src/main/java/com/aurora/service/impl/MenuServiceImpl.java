@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.aurora.constant.CommonConstant.COMPONENT;
+import static com.aurora.constant.CommonConstant.LAYOUT_COMPONENT;
 import static com.aurora.constant.CommonConstant.TRUE;
 
 @Service
@@ -158,7 +158,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
                         .collect(Collectors.toList());
             } else {
                 userMenuDTO.setPath(item.getPath());
-                userMenuDTO.setComponent(COMPONENT);
+                userMenuDTO.setComponent(LAYOUT_COMPONENT);
                 list.add(UserMenuDTO.builder()
                         .path("")
                         .name(item.getName())

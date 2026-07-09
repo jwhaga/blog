@@ -14,8 +14,8 @@ import org.springframework.beans.BeanUtils;
 
 import java.util.Date;
 
-import static com.aurora.constant.CommonConstant.ONE;
-import static com.aurora.constant.CommonConstant.ZERO;
+import static com.aurora.constant.CommonConstant.FALSE;
+import static com.aurora.constant.CommonConstant.TRUE;
 
 public abstract class AbstractQuartzJob implements org.quartz.Job {
 
@@ -54,10 +54,10 @@ public abstract class AbstractQuartzJob implements org.quartz.Job {
         long runMs = jobLog.getEndTime().getTime() - jobLog.getStartTime().getTime();
         jobLog.setJobMessage(jobLog.getJobName() + " 总共耗时：" + runMs + "毫秒");
         if (e != null) {
-            jobLog.setStatus(ZERO);
+            jobLog.setStatus(FALSE);
             jobLog.setExceptionInfo(ExceptionUtil.getTrace(e));
         } else {
-            jobLog.setStatus(ONE);
+            jobLog.setStatus(TRUE);
         }
         SpringUtil.getBean(JobLogMapper.class).insert(jobLog);
     }

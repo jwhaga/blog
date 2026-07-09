@@ -53,16 +53,16 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public void refreshToken(UserDetailsDTO userDetailsDTO) {
         LocalDateTime currentTime = LocalDateTime.now();
-        userDetailsDTO.setExpireTime(currentTime.plusSeconds(EXPIRE_TIME));
+        userDetailsDTO.setExpireTime(currentTime.plusSeconds(TOKEN_EXPIRE_SECONDS));
         String userId = userDetailsDTO.getId().toString();
-        redisService.hSet(LOGIN_USER, userId, userDetailsDTO, EXPIRE_TIME);
+        redisService.hSet(LOGIN_USER, userId, userDetailsDTO, TOKEN_EXPIRE_SECONDS);
     }
 
     @Override
     public void renewToken(UserDetailsDTO userDetailsDTO) {
         LocalDateTime expireTime = userDetailsDTO.getExpireTime();
         LocalDateTime currentTime = LocalDateTime.now();
-        if (Duration.between(currentTime, expireTime).toMinutes() <= TWENTY_MINUTES) {
+        if (Duration.between(currentTime, expireTime).toMinutes() <= CAPTCHA_EXPIRE_MINUTES) {
             refreshToken(userDetailsDTO);
         }
     }

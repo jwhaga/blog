@@ -1,5 +1,9 @@
 package com.aurora.exception;
 
+/**
+ * 定时任务异常。
+ * 继承受检异常 Exception，强制调用方处理。
+ */
 public class TaskException extends Exception {
 
     private static final long serialVersionUID = 1L;
@@ -19,7 +23,15 @@ public class TaskException extends Exception {
         return code;
     }
 
+    /**
+     * 定时任务错误码枚举
+     */
     public enum Code {
-        TASK_EXISTS, NO_TASK_EXISTS, TASK_ALREADY_STARTED, UNKNOWN, CONFIG_ERROR, TASK_NODE_NOT_AVAILABLE
+        TASK_EXISTS,
+        NO_TASK_EXISTS,
+        TASK_ALREADY_STARTED,
+        UNKNOWN,
+        CONFIG_ERROR,
+        TASK_NODE_NOT_AVAILABLE
     }
 }
