@@ -1,5 +1,5 @@
 import mermaidPlugin from "@agoose77/markdown-it-mermaid";
-export default function markdownToHtml(content: any) {
+export default function markdownToHtml(content: string) {
   const MarkdownIt = require('markdown-it')
   const md = new MarkdownIt({
     html: true

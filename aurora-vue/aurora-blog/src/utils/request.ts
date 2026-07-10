@@ -24,6 +24,7 @@ const request = axios.create({
 
 // ----- Request interceptor: inject auth token -----
 request.interceptors.request.use(
+  // 使用 any 是因为当前 axios 版本未导出 InternalAxiosRequestConfig 类型
   (config: any) => {
     const token = sessionStorage.getItem('token')
     if (token) {

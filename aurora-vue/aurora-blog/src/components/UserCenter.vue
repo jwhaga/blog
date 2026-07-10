@@ -88,6 +88,7 @@ export default defineComponent({
   name: 'UserCenter',
   components: { AvatarCropper },
   setup() {
+    // 使用 any 是因为访问 Vue 全局属性（如 $notify），其类型由插件注入，难以静态推断
     const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
     const userStore = useUserStore()
     const reactiveData = reactive({
@@ -98,7 +99,7 @@ export default defineComponent({
       loading: false,
       switchState: false
     })
-    let showCropper = ref(false)
+    const showCropper = ref(false)
     const handleClose = () => {
       userStore.userVisible = false
     }
@@ -106,41 +107,71 @@ export default defineComponent({
       reactiveData.emailDialogVisible = true
     }
     const bingingEmail = () => {
-      let params = {
+      const params = {
         email: reactiveData.email,
         code: reactiveData.VerificationCode
       }
-      api.bindingEmail(params).then(({ data }) => {
-        if (data.flag) {
-          proxy.$notify({
-            title: 'Success',
-            message: '绑定成功',
-            type: 'success'
-          })
-          userStore.userInfo.email = reactiveData.email
-          reactiveData.emailDialogVisible = false
-        }
-      })
+      api.bindingEmail(params)
+        .then(({ data }) => {
+          if (data.flag) {
+            proxy.$notify({
+              title: 'Success',
+              message: '绑定成功',
+              type: 'success'
+            })
+            userStore.userInfo.email = reactiveData.email
+            reactiveData.emailDialogVisible = false
+          }
+        })
+        .catch(() => {
+          // 邮箱绑定失败时静默处理
+        })
     }
     const handleSuccess = (data: any) => {
-      data.response.json().then((data: any) => {
-        if (data.flag) {
-          userStore.userInfo.avatar = data.data
-          proxy.$notify({
-            title: 'Success',
-            message: '上传成功',
-            type: 'success'
-          })
-        }
-      })
+      data.response.json()
+        .then((data: any) => {
+          if (data.flag) {
+            userStore.userInfo.avatar = data.data
+            proxy.$notify({
+              title: 'Success',
+              message: '上传成功',
+              type: 'success'
+            })
+          }
+        })
+        .catch(() => {
+          // 头像上传响应解析失败时静默处理
+        })
     }
     const changeSubscribe = () => {
       if (reactiveData.switchState) {
-        let params = {
+        const params = {
           userId: userStore.userInfo?.userInfoId,
           isSubscribe: userStore.userInfo?.isSubscribe
         }
-        api.updateUserSubscribe(params).then(({ data }) => {
+        api.updateUserSubscribe(params)
+          .then(({ data }) => {
+            if (data.flag) {
+              proxy.$notify({
+                title: 'Success',
+                message: '修改成功',
+                type: 'success'
+              })
+            }
+          })
+          .catch(() => {
+            // 订阅状态更新失败时静默处理
+          })
+      }
+    }
+    const commit = () => {
+      const params = {
+        nickname: userStore.userInfo?.nickname,
+        website: userStore.userInfo?.website,
+        intro: userStore.userInfo?.intro
+      }
+      api.submitUserInfo(params)
+        .then(({ data }) => {
           if (data.flag) {
             proxy.$notify({
               title: 'Success',
@@ -149,34 +180,24 @@ export default defineComponent({
             })
           }
         })
-      }
-    }
-    const commit = () => {
-      let params = {
-        nickname: userStore.userInfo?.nickname,
-        website: userStore.userInfo?.website,
-        intro: userStore.userInfo?.intro
-      }
-      api.submitUserInfo(params).then(({ data }) => {
-        if (data.flag) {
-          proxy.$notify({
-            title: 'Success',
-            message: '修改成功',
-            type: 'success'
-          })
-        }
-      })
+        .catch(() => {
+          // 用户信息提交失败时静默处理
+        })
     }
     const sendCode = () => {
-      api.sendValidationCode(reactiveData.email).then(({ data }) => {
-        if (data.flag) {
-          proxy.$notify({
-            title: 'Success',
-            message: '验证码已发送',
-            type: 'success'
-          })
-        }
-      })
+      api.sendValidationCode(reactiveData.email)
+        .then(({ data }) => {
+          if (data.flag) {
+            proxy.$notify({
+              title: 'Success',
+              message: '验证码已发送',
+              type: 'success'
+            })
+          }
+        })
+        .catch(() => {
+          // 验证码发送失败时静默处理
+        })
     }
     const beforeChange = () => {
       reactiveData.switchState = true

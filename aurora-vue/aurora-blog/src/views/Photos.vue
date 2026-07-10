@@ -77,19 +77,23 @@ export default defineComponent({
       v3ImgPreviewFn({ images: reactiveData.photos, index })
     }
     const loadDataFromServer = () => {
-      let params = {
+      const params = {
         current: reactiveData.current,
         size: reactiveData.size
       }
-      api.getPhotosBuAlbumId(Number(reactiveData.albumId), params).then(({ data }) => {
-        if (data.data.photos.length > 0) {
-          reactiveData.current++
-          reactiveData.photoAlbumName = data.data.photoAlbumName
-          reactiveData.photos.push(...data.data.photos)
-        } else {
-          reactiveData.noResult = true
-        }
-      })
+      api.getPhotosBuAlbumId(Number(reactiveData.albumId), params)
+        .then(({ data }) => {
+          if (data.data.photos.length > 0) {
+            reactiveData.current++
+            reactiveData.photoAlbumName = data.data.photoAlbumName
+            reactiveData.photos.push(...data.data.photos)
+          } else {
+            reactiveData.noResult = true
+          }
+        })
+        .catch(() => {
+          // 相册照片加载失败时静默处理
+        })
     }
     return {
       ...toRefs(reactiveData),

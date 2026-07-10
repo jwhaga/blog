@@ -20,13 +20,12 @@
         :pageSize="pagination.size"
         :pageTotal="pagination.total"
         :page="pagination.current"
-        @pageChange="pageChangeHanlder" />
+        @pageChange="pageChangeHandler" />
     </div>
   </div>
 </template>
 <script lang="ts">
 import { defineComponent, onMounted, reactive, toRefs } from 'vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
 import { ArticleCard } from '@/components/ArticleCard'
 import Paginator from '@/components/Paginator.vue'
 import { useRoute } from 'vue-router'
@@ -35,7 +34,7 @@ import markdownToHtml from '@/utils/markdown'
 
 export default defineComponent({
   name: 'ArticleList',
-  components: { Breadcrumb, ArticleCard, Paginator },
+  components: { ArticleCard, Paginator },
   setup() {
     const route = useRoute()
     const pagination = reactive({
@@ -71,13 +70,16 @@ export default defineComponent({
           pagination.total = data.data.count
           reactiveData.haveArticles = true
         })
+        .catch(() => {
+          // 按标签加载文章失败时静默处理
+        })
     }
     const backToPageTop = () => {
       window.scrollTo({
         top: 0
       })
     }
-    const pageChangeHanlder = (current: number) => {
+    const pageChangeHandler = (current: number) => {
       reactiveData.articles = []
       pagination.current = current
       backToPageTop()
@@ -85,7 +87,7 @@ export default defineComponent({
     }
     return {
       pagination,
-      pageChangeHanlder,
+      pageChangeHandler,
       ...toRefs(reactiveData)
     }
   }

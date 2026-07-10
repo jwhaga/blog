@@ -7,19 +7,22 @@ export class AuroraWaifu {
   }
   constructor(options?: AWFConfig) {
     if (options?.resourcePath) this.configs.resourcePath = options.resourcePath
-    Promise.all([this.injectResources('live2d.min.js')]).then(() => {
-      new AuroraBotSoftware({
-        apiPath: 'https://cdn.jsdelivr.net/gh/fghrsh/live2d_api/',
-        locale: 'en',
-        containerId: 'waifu-tips',
-        messageId: 'waifu-tips'
+    Promise.all([this.injectResources('live2d.min.js')])
+      .then(() => {
+        new AuroraBotSoftware({
+          apiPath: 'https://cdn.jsdelivr.net/gh/fghrsh/live2d_api/',
+          locale: 'en',
+          containerId: 'waifu-tips',
+          messageId: 'waifu-tips'
+        })
       })
-    })
+      .catch(() => {
+        // live2d 资源加载失败时静默处理，不影响主应用
+      })
   }
-  async injectResources(url: string): Promise<any> {
-    let tag = null
+  async injectResources(url: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      tag = document.createElement('script')
+      const tag = document.createElement('script')
       tag.src = this.configs.resourcePath + url
       tag.onload = () => resolve(url)
       tag.onerror = () => reject(url)
@@ -317,12 +320,18 @@ class AuroraBotSoftware {
       .then((result) => {
         this.showMessage(result.hitokoto, 6000, 9)
       })
+      .catch(() => {
+        // 忽略一言接口异常，避免未处理的 Promise 拒绝
+      })
   }
   getTheySaidSo() {
     fetch('https://quotes.rest/qod?language=en')
       .then((response) => response.json())
       .then((result) => {
         this.showMessage(result.contents.quotes[0].quote, 6000, 9)
+      })
+      .catch(() => {
+        // 忽略名言接口异常，避免未处理的 Promise 拒绝
       })
   }
 }

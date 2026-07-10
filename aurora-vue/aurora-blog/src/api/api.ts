@@ -1,4 +1,4 @@
-﻿import request from '@/utils/request'
+import request from '@/utils/request'
 import type { PageParams, LoginParams, RegisterParams, CommentParams, PasswordParams, AccessArticleParams } from '@/types/blog'
 
 export default {
@@ -6,13 +6,13 @@ export default {
     return request.get('/api/articles/topAndFeatured')
   },
   getArticles: (params: PageParams) => {
-    return request.get('/api/articles/all', { params: params })
+    return request.get('/api/articles/all', { params })
   },
   getArticlesByCategoryId: (params: PageParams) => {
-    return request.get('/api/articles/categoryId', { params: params })
+    return request.get('/api/articles/categoryId', { params })
   },
   getArticeById: (articleId: number) => {
-    return request.get('/api/articles/' + articleId)
+    return request.get(`/api/articles/${articleId}`)
   },
   getAllCategories: () => {
     return request.get('/api/categories/all')
@@ -24,10 +24,10 @@ export default {
     return request.get('/api/tags/topTen')
   },
   getArticlesByTagId: (params: PageParams) => {
-    return request.get('/api/articles/tagId', { params: params })
+    return request.get('/api/articles/tagId', { params })
   },
   getAllArchives: (params: PageParams) => {
-    return request.get('/api/archives/all', { params: params })
+    return request.get('/api/archives/all', { params })
   },
   login: (params: LoginParams) => {
     const formData = new URLSearchParams()
@@ -43,7 +43,7 @@ export default {
     return request.post('/api/comments/save', params)
   },
   getComments: (params: PageParams) => {
-    return request.get('/api/comments', { params: params })
+    return request.get('/api/comments', { params })
   },
   getTopSixComments: () => {
     return request.get('/api/comments/topSix')
@@ -58,16 +58,14 @@ export default {
     return request.put('/api/users/info', params)
   },
   getUserInfoById: (id: number) => {
-    return request.get('/api/users/info/' + id)
+    return request.get(`/api/users/info/${id}`)
   },
   updateUserSubscribe: (params: Record<string, unknown>) => {
     return request.put('/api/users/subscribe', params)
   },
   sendValidationCode: (username: string) => {
     return request.get('/api/users/code', {
-      params: {
-        username: username
-      }
+      params: { username }
     })
   },
   bindingEmail: (params: Record<string, unknown>) => {
@@ -78,15 +76,15 @@ export default {
   },
   searchArticles: (params: Record<string, unknown>) => {
     return request.get('/api/articles/search', {
-      params: params
+      params
     })
   },
   getAlbums: () => {
     return request.get('/api/photos/albums')
   },
   getPhotosBuAlbumId: (albumId: number, params: PageParams) => {
-    return request.get('/api/albums/' + albumId + '/photos', {
-      params: params
+    return request.get(`/api/albums/${albumId}/photos`, {
+      params
     })
   },
   getWebsiteConfig: () => {
@@ -96,15 +94,15 @@ export default {
     return request.post('/api/users/oauth/qq', params)
   },
   report: () => {
-    request.post('/api/report')
+    return request.post('/api/report')
   },
   getTalks: (params: PageParams) => {
     return request.get('/api/talks', {
-      params: params
+      params
     })
   },
   getTalkById: (id: number) => {
-    return request.get('/api/talks/' + id)
+    return request.get(`/api/talks/${id}`)
   },
   logout: () => {
     return request.post('/api/users/logout')

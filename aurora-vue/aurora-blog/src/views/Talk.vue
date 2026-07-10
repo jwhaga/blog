@@ -52,7 +52,6 @@
 import { defineComponent, onMounted, reactive, toRefs, provide, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import Breadcrumb from '@/components/Breadcrumb.vue'
 import { Sidebar, Profile } from '../components/Sidebar'
 import { Comment } from '../components/Comment'
 import Avatar from '../components/Avatar.vue'
@@ -63,7 +62,7 @@ import api from '@/api/api'
 
 export default defineComponent({
   name: 'talks',
-  components: { Breadcrumb, Sidebar, Profile, Comment, Avatar },
+  components: { Sidebar, Profile, Comment, Avatar },
   setup() {
     const { t } = useI18n()
     const commentStore = useCommentStore()
@@ -109,16 +108,20 @@ export default defineComponent({
       v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(index) })
     }
     const fetchTalk = () => {
-      api.getTalkById(Number(route.params.talkId)).then(({ data }) => {
-        if (data.data === null) {
-          router.push({ path: '/出错啦' })
-          return
-        }
-        reactiveData.talk = data.data
-        if (reactiveData.talk.imgs) {
-          reactiveData.images.push(...reactiveData.talk.imgs)
-        }
-      })
+      api.getTalkById(Number(route.params.talkId))
+        .then(({ data }) => {
+          if (data.data === null) {
+            router.push({ path: '/出错啦' })
+            return
+          }
+          reactiveData.talk = data.data
+          if (reactiveData.talk.imgs) {
+            reactiveData.images.push(...reactiveData.talk.imgs)
+          }
+        })
+        .catch(() => {
+          // 说说详情加载失败时静默处理
+        })
     }
     const fetchComments = () => {
       const params = {
@@ -127,31 +130,39 @@ export default defineComponent({
         current: pageInfo.current,
         size: pageInfo.size
       }
-      api.getComments(params).then(({ data }) => {
-        if (reactiveData.isReload) {
-          reactiveData.comments = data.data.records
-          reactiveData.isReload = false
-        } else {
-          reactiveData.comments.push(...data.data.records)
-        }
-        if (data.data.count <= reactiveData.comments.length) {
-          reactiveData.haveMore = false
-        } else {
-          reactiveData.haveMore = true
-        }
-        pageInfo.current++
-      })
+      api.getComments(params)
+        .then(({ data }) => {
+          if (reactiveData.isReload) {
+            reactiveData.comments = data.data.records
+            reactiveData.isReload = false
+          } else {
+            reactiveData.comments.push(...data.data.records)
+          }
+          if (data.data.count <= reactiveData.comments.length) {
+            reactiveData.haveMore = false
+          } else {
+            reactiveData.haveMore = true
+          }
+          pageInfo.current++
+        })
+        .catch(() => {
+          // 评论列表加载失败时静默处理
+        })
     }
     const fetchReplies = (index: any) => {
-      api.getRepliesByCommentId(reactiveData.comments[index].id).then(({ data }) => {
-        reactiveData.comments[index].replyDTOs = data.data
-      })
+      api.getRepliesByCommentId(reactiveData.comments[index].id)
+        .then(({ data }) => {
+          reactiveData.comments[index].replyDTOs = data.data
+        })
+        .catch(() => {
+          // 回复列表加载失败时静默处理
+        })
     }
     const formatTime = (data: any): string => {
-      let hours = new Date(data).getHours()
-      let minutes = new Date(data).getMinutes()
-      let seconds = new Date(data).getSeconds()
-      return hours + ':' + minutes + ':' + seconds
+      const hours = new Date(data).getHours()
+      const minutes = new Date(data).getMinutes()
+      const seconds = new Date(data).getSeconds()
+      return `${hours}:${minutes}:${seconds}`
     }
     const toPageTop = () => {
       window.scrollTo({

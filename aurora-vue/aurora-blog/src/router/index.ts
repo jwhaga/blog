@@ -1,6 +1,6 @@
-import type { RouteRecordRaw } from 'vue-router'
-﻿import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 
+// 使用 any 是因为路由配置中包含自定义的 hidden 字段，不在 RouteRecordRaw 类型定义内
 const routes: any = [
   {
     path: '/',

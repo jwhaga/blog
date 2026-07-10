@@ -20,7 +20,6 @@ import v3ImgPreview from 'v3-img-preview'
 import 'mavon-editor/dist/css/index.css'
 import api from './api/api'
 
-
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
 export const app = createApp(App)
@@ -43,8 +42,7 @@ plugins.forEach((plugin) => {
 })
 registerSvgIcon(app)
 registerObSkeleton(app)
-app.config.errorHandler = (err, instance, info) => { console.warn('[Aurora]', err) }
 app.mount('#app')
-api.report()
-console.log('%c 网站作者:花未眠', 'color:#bada55')
-console.log('%c qq:1909925152', 'color:#bada55')
+api.report().catch(() => {
+  // 上报接口失败时静默处理，不影响应用启动
+})

@@ -171,6 +171,7 @@ export default defineComponent({
   name: 'Article',
   components: { Sidebar, Comment, SubTitle, ArticleCard, Profile, Sticky, Navigator },
   setup() {
+    // 使用 any 是因为访问 Vue 全局属性（如 $notify），其类型由插件注入，难以静态推断
     const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
     const commonStore = useCommonStore()
     const commentStore = useCommentStore()
@@ -246,11 +247,11 @@ export default defineComponent({
       v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(index) })
     }
     const initTocbot = () => {
-      let nodes = articleRef.value.children
+      const nodes = articleRef.value.children
       if (nodes.length) {
         for (let i = 0; i < nodes.length; i++) {
-          let node = nodes[i]
-          let reg = /^H[1-4]{1}$/
+          const node = nodes[i]
+          const reg = /^H[1-4]{1}$/
           if (reg.exec(node.tagName)) {
             node.id = i
           }
@@ -267,7 +268,7 @@ export default defineComponent({
         }
       })
       const imgs = articleRef.value.getElementsByTagName('img')
-      for (var i = 0; i < imgs.length; i++) {
+      for (let i = 0; i < imgs.length; i++) {
         reactiveData.images.push(imgs[i].src)
         imgs[i].addEventListener('click', function (e: any) {
           handlePreview(e.target.currentSrc)
@@ -276,53 +277,58 @@ export default defineComponent({
     }
     const fetchArticle = () => {
       loading.value = true
-      api.getArticeById(reactiveData.articleId).then(({ data }) => {
-        if (data.code === 52003) {
-          proxy.$notify({
-            title: 'Error',
-            message: '文章密码认证未通过',
-            type: 'error'
+      api.getArticeById(reactiveData.articleId)
+        .then(({ data }) => {
+          if (data.code === 52003) {
+            proxy.$notify({
+              title: 'Error',
+              message: '文章密码认证未通过',
+              type: 'error'
+            })
+            router.push({ path: '/出错啦' })
+            return
+          }
+          if (data.data === null) {
+            router.push({ path: '/出错啦' })
+            return
+          }
+          commonStore.setHeaderImage(data.data.articleCover)
+          new Promise((resolve) => {
+            data.data.articleContent = markdownToHtml(data.data.articleContent)
+            resolve(data.data)
+          }).then((article: any) => {
+            reactiveData.article = article
+            reactiveData.wordNum = Math.round(deleteHTMLTag(article.articleContent).length / 100) / 10 + 'k'
+            reactiveData.readTime = Math.round(deleteHTMLTag(article.articleContent).length / 400) + 'mins'
+            loading.value = false
+            nextTick(() => {
+              Prism.highlightAll()
+              initTocbot()
+            })
           })
-          router.push({ path: '/出错啦' })
-          return
-        }
-        if (data.data === null) {
-          router.push({ path: '/出错啦' })
-          return
-        }
-        commonStore.setHeaderImage(data.data.articleCover)
-        new Promise((resolve) => {
-          data.data.articleContent = markdownToHtml(data.data.articleContent)
-          resolve(data.data)
-        }).then((article: any) => {
-          reactiveData.article = article
-          reactiveData.wordNum = Math.round(deleteHTMLTag(article.articleContent).length / 100) / 10 + 'k'
-          reactiveData.readTime = Math.round(deleteHTMLTag(article.articleContent).length / 400) + 'mins'
+          new Promise((resolve) => {
+            data.data.preArticleCard.articleContent = markdownToHtml(data.data.preArticleCard.articleContent)
+              .replace(/<\/?[^>]*>/g, '')
+              .replace(/[|]*\n/, '')
+              .replace(/&npsp;/gi, '')
+            resolve(data.data.preArticleCard)
+          }).then((preArticleCard: any) => {
+            reactiveData.preArticleCard = preArticleCard
+          })
+          new Promise((resolve) => {
+            data.data.nextArticleCard.articleContent = markdownToHtml(data.data.nextArticleCard.articleContent)
+              .replace(/<\/?[^>]*>/g, '')
+              .replace(/[|]*\n/, '')
+              .replace(/&npsp;/gi, '')
+            resolve(data.data.nextArticleCard)
+          }).then((nextArticleCard) => {
+            reactiveData.nextArticleCard = nextArticleCard
+          })
+        })
+        .catch(() => {
+          // 文章详情加载失败时静默处理
           loading.value = false
-          nextTick(() => {
-            Prism.highlightAll()
-            initTocbot()
-          })
         })
-        new Promise((resolve) => {
-          data.data.preArticleCard.articleContent = markdownToHtml(data.data.preArticleCard.articleContent)
-            .replace(/<\/?[^>]*>/g, '')
-            .replace(/[|]*\n/, '')
-            .replace(/&npsp;/gi, '')
-          resolve(data.data.preArticleCard)
-        }).then((preArticleCard: any) => {
-          reactiveData.preArticleCard = preArticleCard
-        })
-        new Promise((resolve) => {
-          data.data.nextArticleCard.articleContent = markdownToHtml(data.data.nextArticleCard.articleContent)
-            .replace(/<\/?[^>]*>/g, '')
-            .replace(/[|]*\n/, '')
-            .replace(/&npsp;/gi, '')
-          resolve(data.data.nextArticleCard)
-        }).then((nextArticleCard) => {
-          reactiveData.nextArticleCard = nextArticleCard
-        })
-      })
     }
     const fetchComments = () => {
       const params = {
@@ -331,25 +337,33 @@ export default defineComponent({
         current: pageInfo.current,
         size: pageInfo.size
       }
-      api.getComments(params).then(({ data }) => {
-        if (reactiveData.isReload) {
-          reactiveData.comments = data.data.records
-          reactiveData.isReload = false
-        } else {
-          reactiveData.comments.push(...data.data.records)
-        }
-        if (data.data.count <= reactiveData.comments.length) {
-          reactiveData.haveMore = false
-        } else {
-          reactiveData.haveMore = true
-        }
-        pageInfo.current++
-      })
+      api.getComments(params)
+        .then(({ data }) => {
+          if (reactiveData.isReload) {
+            reactiveData.comments = data.data.records
+            reactiveData.isReload = false
+          } else {
+            reactiveData.comments.push(...data.data.records)
+          }
+          if (data.data.count <= reactiveData.comments.length) {
+            reactiveData.haveMore = false
+          } else {
+            reactiveData.haveMore = true
+          }
+          pageInfo.current++
+        })
+        .catch(() => {
+          // 评论列表加载失败时静默处理
+        })
     }
     const fetchReplies = (index: any) => {
-      api.getRepliesByCommentId(reactiveData.comments[index].id).then(({ data }) => {
-        reactiveData.comments[index].replyDTOs = data.data
-      })
+      api.getRepliesByCommentId(reactiveData.comments[index].id)
+        .then(({ data }) => {
+          reactiveData.comments[index].replyDTOs = data.data
+        })
+        .catch(() => {
+          // 回复列表加载失败时静默处理
+        })
     }
     const handleAuthorClick = (link: string) => {
       if (link === '') link = window.location.href

@@ -76,11 +76,11 @@ export const useAppStore = defineStore('appStore', {
       this.appLoading = true
     },
     endLoading() {
-      this.NPTimeout = <any>setTimeout(() => {
+      this.NPTimeout = window.setTimeout(() => {
         nProgress.done()
       }, 100)
 
-      this.loadingTimeout = <any>setTimeout(() => {
+      this.loadingTimeout = window.setTimeout(() => {
         this.appLoading = false
       }, 300)
     }

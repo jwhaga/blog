@@ -115,11 +115,11 @@ export default defineComponent({
       v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(index) })
     }
     const initTocbot = () => {
-      let nodes = postRef.value.children
+      const nodes = postRef.value.children
       if (nodes.length) {
         for (let i = 0; i < nodes.length; i++) {
-          let node = nodes[i]
-          let reg = /^H[1-4]{1}$/
+          const node = nodes[i]
+          const reg = /^H[1-4]{1}$/
           if (reg.exec(node.tagName)) {
             node.id = i
           }
@@ -136,7 +136,7 @@ export default defineComponent({
         }
       })
       const imgs = postRef.value.getElementsByTagName('img')
-      for (var i = 0; i < imgs.length; i++) {
+      for (let i = 0; i < imgs.length; i++) {
         reactiveData.images.push(imgs[i].src)
         imgs[i].addEventListener('click', function (e: any) {
           handlePreview(e.target.currentSrc)
@@ -144,14 +144,18 @@ export default defineComponent({
       }
     }
     const fetchAbout = () => {
-      api.getAbout().then(({ data }) => {
-        data.data.content = markdownToHtml(data.data.content)
-        reactiveData.about = data.data.content
-        nextTick(() => {
-          Prism.highlightAll()
-          initTocbot()
+      api.getAbout()
+        .then(({ data }) => {
+          data.data.content = markdownToHtml(data.data.content)
+          reactiveData.about = data.data.content
+          nextTick(() => {
+            Prism.highlightAll()
+            initTocbot()
+          })
         })
-      })
+        .catch(() => {
+          // 关于页内容加载失败时静默处理
+        })
     }
     const fetchComments = () => {
       const params = {
@@ -160,25 +164,33 @@ export default defineComponent({
         current: pageInfo.current,
         size: pageInfo.size
       }
-      api.getComments(params).then(({ data }) => {
-        if (reactiveData.isReload) {
-          reactiveData.comments = data.data.records
-          reactiveData.isReload = false
-        } else {
-          reactiveData.comments.push(...data.data.records)
-        }
-        if (data.data.count <= reactiveData.comments.length) {
-          reactiveData.haveMore = false
-        } else {
-          reactiveData.haveMore = true
-        }
-        pageInfo.current++
-      })
+      api.getComments(params)
+        .then(({ data }) => {
+          if (reactiveData.isReload) {
+            reactiveData.comments = data.data.records
+            reactiveData.isReload = false
+          } else {
+            reactiveData.comments.push(...data.data.records)
+          }
+          if (data.data.count <= reactiveData.comments.length) {
+            reactiveData.haveMore = false
+          } else {
+            reactiveData.haveMore = true
+          }
+          pageInfo.current++
+        })
+        .catch(() => {
+          // 评论列表加载失败时静默处理
+        })
     }
     const fetchReplies = (index: any) => {
-      api.getRepliesByCommentId(reactiveData.comments[index].id).then(({ data }) => {
-        reactiveData.comments[index].replyDTOs = data.data
-      })
+      api.getRepliesByCommentId(reactiveData.comments[index].id)
+        .then(({ data }) => {
+          reactiveData.comments[index].replyDTOs = data.data
+        })
+        .catch(() => {
+          // 回复列表加载失败时静默处理
+        })
     }
     return {
       postRef,

@@ -18,6 +18,7 @@ import api from '@/api/api'
 export default defineComponent({
   name: 'OauthLoginModel',
   setup() {
+    // 使用 any 是因为访问 Vue 全局属性（如 $notify），其类型由插件注入，难以静态推断
     const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
     const userStore = useUserStore()
     const route = useRoute()
@@ -27,23 +28,27 @@ export default defineComponent({
       if (QC.Login.check()) {
         //@ts-ignore
         QC.Login.getMe(function (openId, accessToken) {
-          let params = {
-            openId: openId,
-            accessToken: accessToken
+          const params = {
+            openId,
+            accessToken
           }
-          api.qqlogin(params as any).then((resp: any) => {
-      const data = resp.data
-            if (data.flag) {
-              userStore.userInfo = data.data
-              userStore.token = data.data.token
-              sessionStorage.setItem('token', data.data.token)
-              proxy.$notify({
-                title: 'Success',
-                message: '登录成功',
-                type: 'success'
-              })
-            }
-          })
+          api.qqlogin(params as any)
+            .then((resp: any) => {
+              const data = resp.data
+              if (data.flag) {
+                userStore.userInfo = data.data
+                userStore.token = data.data.token
+                sessionStorage.setItem('token', data.data.token)
+                proxy.$notify({
+                  title: 'Success',
+                  message: '登录成功',
+                  type: 'success'
+                })
+              }
+            })
+            .catch(() => {
+              // QQ 登录失败时静默处理
+            })
           if (userStore.currentUrl === '') {
             router.push({ path: '/' })
           } else {

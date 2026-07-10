@@ -53,7 +53,7 @@
           :pageSize="pagination.size"
           :pageTotal="pagination.total"
           :page="pagination.current"
-          @pageChange="pageChangeHanlder" />
+          @pageChange="pageChangeHandler" />
       </div>
       <div>
         <Sidebar>
@@ -71,7 +71,7 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref, toRefs, toRef, reactive } from 'vue'
 import { Feature, FeatureList } from '@/components/Feature'
-import { ArticleCard, HorizontalArticle } from '@/components/ArticleCard'
+import { ArticleCard } from '@/components/ArticleCard'
 import { Title } from '@/components/Title'
 import { Sidebar, Profile, RecentComment, TagBox, Notice, WebsiteInfo } from '@/components/Sidebar'
 import { useAppStore } from '@/stores/app'
@@ -89,7 +89,6 @@ export default defineComponent({
     Feature,
     FeatureList,
     ArticleCard,
-    HorizontalArticle,
     Title,
     Paginator,
     Sidebar,
@@ -132,20 +131,24 @@ export default defineComponent({
       articleOffset.value = articleListEl && articleListEl instanceof HTMLElement ? articleListEl.offsetTop + 120 : 0
     })
     const fetchTopAndFeatured = () => {
-      api.getTopAndFeaturedArticles().then(({ data }) => {
-        data.data.topArticle.articleContent = markdownToHtml(data.data.topArticle.articleContent)
-          .replace(/<\/?[^>]*>/g, '')
-          .replace(/[|]*\n/, '')
-          .replace(/&npsp;/gi, '')
-        data.data.featuredArticles.forEach((item: any) => {
-          item.articleContent = markdownToHtml(item.articleContent)
+      api.getTopAndFeaturedArticles()
+        .then(({ data }) => {
+          data.data.topArticle.articleContent = markdownToHtml(data.data.topArticle.articleContent)
             .replace(/<\/?[^>]*>/g, '')
             .replace(/[|]*\n/, '')
             .replace(/&npsp;/gi, '')
+          data.data.featuredArticles.forEach((item: any) => {
+            item.articleContent = markdownToHtml(item.articleContent)
+              .replace(/<\/?[^>]*>/g, '')
+              .replace(/[|]*\n/, '')
+              .replace(/&npsp;/gi, '')
+          })
+          articleStore.topArticle = data.data.topArticle
+          articleStore.featuredArticles = data.data.featuredArticles
         })
-        articleStore.topArticle = data.data.topArticle
-        articleStore.featuredArticles = data.data.featuredArticles
-      })
+        .catch(() => {
+          // 置顶文章加载失败时静默处理
+        })
     }
     const fetchArticles = () => {
       activeTab.value = userStore.tab
@@ -171,6 +174,9 @@ export default defineComponent({
               reactiveData.haveArticles = true
             }
           })
+          .catch(() => {
+            // 文章列表加载失败时静默处理
+          })
       } else {
         fetchArticlesByCategoryId(userStore.tab)
       }
@@ -194,12 +200,19 @@ export default defineComponent({
           pagination.total = data.data.count
           reactiveData.haveArticles = true
         })
+        .catch(() => {
+          // 按分类加载文章失败时静默处理
+        })
     }
     const fetchCategories = () => {
       categoryStore.categories = []
-      api.getAllCategories().then(({ data }) => {
-        categoryStore.categories.push(...data.data)
-      })
+      api.getAllCategories()
+        .then(({ data }) => {
+          categoryStore.categories.push(...data.data)
+        })
+        .catch(() => {
+          // 分类列表加载失败时静默处理
+        })
     }
     const expandHandler = () => {
       expanderClass.value.expanded = !expanderClass.value.expanded
@@ -223,11 +236,11 @@ export default defineComponent({
         top: articleOffset.value
       })
     }
-    const activeTabStyle = (catagoryId: any) => {
-      if (catagoryId === activeTab.value) return { background: appStore.themeConfig.header_gradient_css }
+    const activeTabStyle = (categoryId: any) => {
+      if (categoryId === activeTab.value) return { background: appStore.themeConfig.header_gradient_css }
       return {}
     }
-    const pageChangeHanlder = (current: number) => {
+    const pageChangeHandler = (current: number) => {
       userStore.page = current
       pagination.current = current
       toArticleOffset()
@@ -253,7 +266,7 @@ export default defineComponent({
       activeTabStyle,
       activeTab,
       pagination,
-      pageChangeHanlder,
+      pageChangeHandler,
       t
     }
   }

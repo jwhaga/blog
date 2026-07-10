@@ -75,25 +75,33 @@ export default defineComponent({
         current: pageInfo.current,
         size: pageInfo.size
       }
-      api.getComments(params).then(({ data }) => {
-        if (reactiveData.isReload) {
-          reactiveData.comments = data.data.records
-          reactiveData.isReload = false
-        } else {
-          reactiveData.comments.push(...data.data.records)
-        }
-        if (data.data.count <= reactiveData.comments.length) {
-          reactiveData.haveMore = false
-        } else {
-          reactiveData.haveMore = true
-        }
-        pageInfo.current++
-      })
+      api.getComments(params)
+        .then(({ data }) => {
+          if (reactiveData.isReload) {
+            reactiveData.comments = data.data.records
+            reactiveData.isReload = false
+          } else {
+            reactiveData.comments.push(...data.data.records)
+          }
+          if (data.data.count <= reactiveData.comments.length) {
+            reactiveData.haveMore = false
+          } else {
+            reactiveData.haveMore = true
+          }
+          pageInfo.current++
+        })
+        .catch(() => {
+          // 留言列表加载失败时静默处理
+        })
     }
     const fetchReplies = (index: any) => {
-      api.getRepliesByCommentId(reactiveData.comments[index].id).then(({ data }) => {
-        reactiveData.comments[index].replyDTOs = data.data
-      })
+      api.getRepliesByCommentId(reactiveData.comments[index].id)
+        .then(({ data }) => {
+          reactiveData.comments[index].replyDTOs = data.data
+        })
+        .catch(() => {
+          // 留言回复加载失败时静默处理
+        })
     }
     return {
       ...toRefs(reactiveData),

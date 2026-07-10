@@ -42,7 +42,7 @@
         :pageSize="pagination.size"
         :pageTotal="pagination.total"
         :page="pagination.current"
-        @pageChange="pageChangeHanlder" />
+        @pageChange="pageChangeHandler" />
     </div>
   </div>
 </template>
@@ -64,6 +64,7 @@ export default defineComponent({
   name: 'Archives',
   components: { Breadcrumb, Paginator },
   setup() {
+    // 使用 any 是因为访问 Vue 全局属性（如 $notify），其类型由插件注入，难以静态推断
     const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
     const articleStore = useArticleStore()
     const commonStore = useCommonStore()
@@ -101,8 +102,11 @@ export default defineComponent({
           articleStore.archives = data.data.records
           pagination.total = data.data.count
         })
+        .catch(() => {
+          // 归档列表加载失败时静默处理
+        })
     }
-    const pageChangeHanlder = (current: number) => {
+    const pageChangeHandler = (current: number) => {
       pagination.current = current
       toPageTop()
       fetchArchives()
@@ -115,7 +119,7 @@ export default defineComponent({
     const toArticle = (article: any) => {
       let isAccess = false
       userStore.accessArticles.forEach((item: any) => {
-        if (item == article.id) {
+        if (item === article.id) {
           isAccess = true
         }
       })
@@ -134,7 +138,7 @@ export default defineComponent({
       }
     }
     return {
-      pageChangeHanlder,
+      pageChangeHandler,
       toArticle,
       pagination,
       archives: toRef(articleStore.$state, 'archives'),

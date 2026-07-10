@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeMount, onUnmounted, onErrorCaptured, ref } from 'vue'
+import { computed, defineComponent, onBeforeMount, onUnmounted, ref } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { useCommonStore } from '@/stores/common'
 import { useMetaStore } from '@/stores/meta'
@@ -59,7 +59,7 @@ export default defineComponent({
     const appStore = useAppStore()
     const commonStore = useCommonStore()
     const metaStore = useMetaStore()
-    const MOBILE_WITH = 996
+    const MOBILE_WIDTH = 996
     const appWrapperClass = 'app-wrapper'
     const loadingBarClass = ref({
       'nprogress-custom-parent': false
@@ -92,20 +92,24 @@ export default defineComponent({
       appStore.initializeTheme(appStore.themeConfig.theme)
     }
     const fetchWebsiteConfig = () => {
-      api.getWebsiteConfig().then(({ data }) => {
-        appStore.viewCount = data.data.viewCount
-        appStore.articleCount = data.data.articleCount
-        appStore.talkCount = data.data.talkCount
-        appStore.categoryCount = data.data.categoryCount
-        appStore.tagCount = data.data.tagCount
-        appStore.websiteConfig = data.data.websiteConfigDTO
-        if (data.data.websiteConfigDTO) { initFavicon(data.data.websiteConfigDTO.favicon) }
-      })
+      api.getWebsiteConfig()
+        .then(({ data }) => {
+          appStore.viewCount = data.data.viewCount
+          appStore.articleCount = data.data.articleCount
+          appStore.talkCount = data.data.talkCount
+          appStore.categoryCount = data.data.categoryCount
+          appStore.tagCount = data.data.tagCount
+          appStore.websiteConfig = data.data.websiteConfigDTO
+          if (data.data.websiteConfigDTO) { initFavicon(data.data.websiteConfigDTO.favicon) }
+        })
+        .catch(() => {
+          // 网站配置加载失败时静默处理，不影响应用渲染
+        })
     }
-    const copyEventHandler = (event: any) => {
+    const copyEventHandler = (event: ClipboardEvent) => {
       if (document.getSelection() instanceof Selection) {
         if (document.getSelection()?.toString() !== '' && event.clipboardData) {
-          event.clipboardData.setData('text', document.getSelection())
+          event.clipboardData.setData('text', document.getSelection()?.toString() ?? '')
           event.preventDefault()
         }
       }
@@ -115,7 +119,7 @@ export default defineComponent({
     }
     const resizeHander = () => {
       const rect = document.body.getBoundingClientRect()
-      const mobileState = rect.width - 1 < MOBILE_WITH
+      const mobileState = rect.width - 1 < MOBILE_WIDTH
       if (isMobile.value !== mobileState) commonStore.changeMobileState(mobileState)
     }
     const initResizeEvent = () => {
@@ -136,21 +140,20 @@ export default defineComponent({
         return
       }
       // 获取 head 标签
-      var head = document.getElementsByTagName('head')[0];
+      const head = document.getElementsByTagName('head')[0]
       // 获取当前 favicon 元素
-      var favicon = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      // Cast favicon to HTMLLinkElement
-      var faviconLink = favicon as HTMLLinkElement;
+      const favicon = document.querySelector("link[rel*='icon']") || document.createElement('link')
+      const faviconLink = favicon as HTMLLinkElement
 
-      faviconLink.type = 'image/x-icon';
-      faviconLink.rel = 'shortcut icon';
+      faviconLink.type = 'image/x-icon'
+      faviconLink.rel = 'shortcut icon'
 
       // 设置新的 favicon 地址
-      faviconLink.href = faviconUrl;
+      faviconLink.href = faviconUrl
 
       // 如果当前 head 标签中不存在 favicon 元素，则将新的 favicon 添加到 head 标签中
       if (!document.querySelector("link[rel*='icon']")) {
-          head.appendChild(faviconLink);
+        head.appendChild(faviconLink)
       }
     }
     return {
@@ -169,7 +172,6 @@ export default defineComponent({
         }
       }),
       wrapperStyle: computed(() => wrapperStyle.value),
-
       isMobile: computed(() => commonStore.isMobile),
       cssVariables: computed(() => {
         if (appStore.themeConfig.theme === 'theme-dark') {

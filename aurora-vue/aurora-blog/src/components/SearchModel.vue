@@ -236,7 +236,7 @@
 
 <script lang="ts">
 import { useSearchStore } from '@/stores/search'
-import { computed, defineComponent, onMounted, onUnmounted, onUpdated, ref, watch } from 'vue'
+import { computed, defineComponent, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import api from '@/api/api'
@@ -265,13 +265,6 @@ export default defineComponent({
         if (searchInput.value) searchInput.value.focus()
       }, 200)
     })
-    //     onUpdated(() => {
-    //       keywords.value = ''
-    //       searchResults.value = []
-    //       setTimeout(() => {
-    //         if (searchInput.value) searchInput.value.focus()
-    //       }, 200)
-    //     })
     onUnmounted(() => {
       document.body.classList.remove('modal--active')
     })
@@ -296,7 +289,7 @@ export default defineComponent({
       searchStore.setOpenModal(false)
     }
     const saveRecentSearch = async (result: any) => {
-      let temp = localStore.weight
+      const temp = localStore.weight
       result.weight = localStore.weight
       localStore.weight++
       localStore.recentSearch.forEach((item: any) => {
@@ -362,23 +355,27 @@ export default defineComponent({
     }
     let index = 0
     const searchKeywords = (e: any) => {
-      let curIndex = ++index
+      const curIndex = ++index
       if (e.target.value !== '') {
-        let params = {
+        const params = {
           keywords: e.target.value
         }
-        api.searchArticles(params).then(({ data }) => {
-          if (curIndex < index) {
-            return
-          }
-          searchResults.value = data.data
-          if (searchResults.value.length > 0) {
-            resetIndex(searchResults.value.length)
-            isEmpty.value = false
-          } else {
-            isEmpty.value = true
-          }
-        })
+        api.searchArticles(params)
+          .then(({ data }) => {
+            if (curIndex < index) {
+              return
+            }
+            searchResults.value = data.data
+            if (searchResults.value.length > 0) {
+              resetIndex(searchResults.value.length)
+              isEmpty.value = false
+            } else {
+              isEmpty.value = true
+            }
+          })
+          .catch(() => {
+            // 搜索请求失败时静默处理
+          })
       } else {
         if (curIndex < index) {
           return

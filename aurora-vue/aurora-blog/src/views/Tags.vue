@@ -37,9 +37,13 @@ export default defineComponent({
       commonStore.resetHeaderImage()
     })
     const fetchTags = () => {
-      api.getAllTags().then(({ data }) => {
-        tagStore.tags = data.data
-      })
+      api.getAllTags()
+        .then(({ data }) => {
+          tagStore.tags = data.data
+        })
+        .catch(() => {
+          // 标签列表加载失败时静默处理
+        })
     }
     return {
       tags: toRef(tagStore.$state, 'tags'),

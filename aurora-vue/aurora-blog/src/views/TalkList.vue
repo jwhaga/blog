@@ -95,41 +95,45 @@ export default defineComponent({
         current: pagination.current,
         size: pagination.size
       }
-      api.getTalks(params).then(({ data }) => {
-        reactiveData.talks = data.data.records
-        pagination.total = data.data.count
-        reactiveData.talks.forEach((item: any) => {
-          if (item.imgs) {
-            reactiveData.images.push(...item.imgs)
-          }
+      api.getTalks(params)
+        .then(({ data }) => {
+          reactiveData.talks = data.data.records
+          pagination.total = data.data.count
+          reactiveData.talks.forEach((item: any) => {
+            if (item.imgs) {
+              reactiveData.images.push(...item.imgs)
+            }
+          })
         })
-      })
+        .catch(() => {
+          // 说说列表加载失败时静默处理
+        })
     }
     const formatTime = (data: any): string => {
-      let hours = new Date(data).getHours()
-      let minutes = new Date(data).getMinutes()
-      let seconds = new Date(data).getSeconds()
-      return hours + ':' + minutes + ':' + seconds
+      const hours = new Date(data).getHours()
+      const minutes = new Date(data).getMinutes()
+      const seconds = new Date(data).getSeconds()
+      return `${hours}:${minutes}:${seconds}`
     }
     const toPageTop = () => {
       window.scrollTo({
         top: 0
       })
     }
-    const pageChangeHanlder = (current: number) => {
+    const pageChangeHandler = (current: number) => {
       reactiveData.talks = ''
       toPageTop()
       pagination.current = current
       fetchTalks()
     }
     const toTalk = (id: any) => {
-      router.push({ path: '/talks/' + id })
+      router.push({ path: `/talks/${id}` })
     }
     return {
       pagination,
       ...toRefs(reactiveData),
       formatTime,
-      pageChangeHanlder,
+      pageChangeHandler,
       handlePreview,
       toTalk,
       t
