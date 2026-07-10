@@ -7,11 +7,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 @Slf4j
 @Service
 public abstract class AbstractUploadStrategyImpl implements UploadStrategy {
+
+    private static final String UPLOAD_FAIL_MESSAGE = "上传失败";
 
     @Override
     public String uploadFile(MultipartFile file, String path) {
@@ -24,8 +27,8 @@ public abstract class AbstractUploadStrategyImpl implements UploadStrategy {
             }
             return getFileAccessUrl(path + fileName);
         } catch (Exception e) {
-            log.error("文件上传失败", e);
-            throw new BizException("文件上传失败");
+            log.error(UPLOAD_FAIL_MESSAGE, e);
+            throw new BizException(UPLOAD_FAIL_MESSAGE);
         }
     }
 
@@ -35,8 +38,8 @@ public abstract class AbstractUploadStrategyImpl implements UploadStrategy {
             upload(path, fileName, inputStream);
             return getFileAccessUrl(path + fileName);
         } catch (Exception e) {
-            log.error("文件上传失败", e);
-            throw new BizException("文件上传失败");
+            log.error(UPLOAD_FAIL_MESSAGE, e);
+            throw new BizException(UPLOAD_FAIL_MESSAGE);
         }
     }
 

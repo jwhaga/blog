@@ -34,6 +34,8 @@ import static com.aurora.constant.CommonConstant.TRUE;
 @Service
 public abstract class AbstractSocialLoginStrategyImpl implements SocialLoginStrategy {
 
+    private static final String USER_ACCOUNT_LOCKED = "用户帐号已被锁定";
+
     @Autowired
     private UserAuthMapper userAuthMapper;
 
@@ -58,6 +60,7 @@ public abstract class AbstractSocialLoginStrategyImpl implements SocialLoginStra
         SocialTokenDTO socialToken = getSocialToken(data);
         String ipAddress = IpUtil.getIpAddress(request);
         String ipSource = IpUtil.getIpSource(ipAddress);
+        // 已有用户直接登录，新用户则自动注册
         UserAuth user = getUserAuth(socialToken);
         if (Objects.nonNull(user)) {
             userDetailsDTO = getUserDetail(user, ipAddress, ipSource);
@@ -65,7 +68,7 @@ public abstract class AbstractSocialLoginStrategyImpl implements SocialLoginStra
             userDetailsDTO = saveUserDetail(socialToken, ipAddress, ipSource);
         }
         if (userDetailsDTO.getIsDisable().equals(TRUE)) {
-            throw new BizException("用户帐号已被锁定");
+            throw new BizException(USER_ACCOUNT_LOCKED);
         }
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetailsDTO, null, userDetailsDTO.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(auth);

@@ -3,14 +3,26 @@ package com.aurora.controller;
 
 import com.aurora.annotation.AccessLimit;
 import com.aurora.annotation.OptLog;
-import com.aurora.model.dto.*;
+import com.aurora.model.dto.PageResultDTO;
+import com.aurora.model.dto.UserAdminDTO;
+import com.aurora.model.dto.UserAreaDTO;
+import com.aurora.model.dto.UserInfoDTO;
+import com.aurora.model.dto.UserLogoutStatusDTO;
+import com.aurora.model.vo.ConditionVO;
+import com.aurora.model.vo.PasswordVO;
+import com.aurora.model.vo.QQLoginVO;
+import com.aurora.model.vo.ResultVO;
+import com.aurora.model.vo.UserVO;
 import com.aurora.service.UserAuthService;
-import com.aurora.model.vo.*;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import java.util.List;
@@ -21,10 +33,15 @@ import static com.aurora.constant.OptTypeConstant.UPDATE;
 @RestController
 public class UserAuthController {
 
+    /** 验证码发送限流时间窗口（秒） */
+    private static final int CODE_LIMIT_SECONDS = 60;
+    /** 验证码发送限流最大请求次数 */
+    private static final int CODE_LIMIT_MAX_COUNT = 1;
+
     @Autowired
     private UserAuthService userAuthService;
 
-    @AccessLimit(seconds = 60,maxCount = 1)
+    @AccessLimit(seconds = CODE_LIMIT_SECONDS, maxCount = CODE_LIMIT_MAX_COUNT)
     @Operation(summary = "发送邮箱验证码")
     @GetMapping("/users/code")
     public ResultVO<?> sendCode(

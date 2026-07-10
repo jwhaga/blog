@@ -14,11 +14,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.aurora.constant.CommonConstant.*;
+import static com.aurora.constant.CommonConstant.FALSE;
+import static com.aurora.constant.CommonConstant.POST_TAG;
+import static com.aurora.constant.CommonConstant.PRE_TAG;
 import static com.aurora.enums.ArticleStatusEnum.PUBLIC;
 
 @Service("mySqlSearchStrategyImpl")
 public class MySqlSearchStrategyImpl implements SearchStrategy {
+
+    private static final int PRE_TEXT_LENGTH = 15;
+    private static final int POST_TEXT_LENGTH = 35;
 
     @Autowired
     private ArticleMapper articleMapper;
@@ -45,11 +50,12 @@ public class MySqlSearchStrategyImpl implements SearchStrategy {
                         }
                     }
                     if (contentIndex != -1) {
-                        int preIndex = contentIndex > 15 ? contentIndex - 15 : 0;
+                        // 截取关键词前后的文本片段用于高亮展示
+                        int preIndex = contentIndex > PRE_TEXT_LENGTH ? contentIndex - PRE_TEXT_LENGTH : 0;
                         String preText = item.getArticleContent().substring(preIndex, contentIndex);
                         int last = contentIndex + keywords.length();
                         int postLength = item.getArticleContent().length() - last;
-                        int postIndex = postLength > 35 ? last + 35 : last + postLength;
+                        int postIndex = postLength > POST_TEXT_LENGTH ? last + POST_TEXT_LENGTH : last + postLength;
                         String postText = item.getArticleContent().substring(contentIndex, postIndex);
                         if (isLowerCase) {
                             articleContent = (preText + postText).replaceAll(keywords.toLowerCase(), PRE_TAG + keywords.toLowerCase() + POST_TAG);

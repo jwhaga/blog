@@ -8,7 +8,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
 import static com.aurora.constant.RabbitMQConstant.EMAIL_QUEUE;
 
 @Component
@@ -20,7 +19,13 @@ public class CommentNoticeConsumer {
 
     @RabbitHandler
     public void process(byte[] data) {
+        if (data == null || data.length == 0) {
+            return;
+        }
         EmailDTO emailDTO = JSON.parseObject(new String(data), EmailDTO.class);
+        if (emailDTO == null) {
+            return;
+        }
         emailUtil.sendHtmlMail(emailDTO);
     }
 

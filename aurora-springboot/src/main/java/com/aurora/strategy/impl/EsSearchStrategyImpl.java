@@ -20,14 +20,22 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.aurora.constant.CommonConstant.*;
+import static com.aurora.constant.CommonConstant.FALSE;
+import static com.aurora.constant.CommonConstant.POST_TAG;
+import static com.aurora.constant.CommonConstant.PRE_TAG;
 import static com.aurora.enums.ArticleStatusEnum.PUBLIC;
 
 @Slf4j
 @Service("esSearchStrategyImpl")
 public class EsSearchStrategyImpl implements SearchStrategy {
+
+    private static final String ARTICLE_TITLE_FIELD = "articleTitle";
+    private static final String ARTICLE_CONTENT_FIELD = "articleContent";
+    private static final int CONTENT_FRAGMENT_SIZE = 50;
 
     @Autowired
     private ElasticsearchOperations elasticsearchOperations;
@@ -41,10 +49,11 @@ public class EsSearchStrategyImpl implements SearchStrategy {
     }
 
     private NativeQuery buildQuery(String keywords) {
+        // 构建布尔查询：标题或内容匹配关键词，且文章未删除且已公开
         Query boolQuery = QueryBuilders.bool(b -> b
                 .must(m -> m.bool(bb -> bb
-                        .should(s -> s.match(ma -> ma.field("articleTitle").query(keywords)))
-                        .should(s -> s.match(ma -> ma.field("articleContent").query(keywords)))
+                        .should(s -> s.match(ma -> ma.field(ARTICLE_TITLE_FIELD).query(keywords)))
+                        .should(s -> s.match(ma -> ma.field(ARTICLE_CONTENT_FIELD).query(keywords)))
                 ))
                 .must(m -> m.term(t -> t.field("isDelete").value((long) FALSE)))
                 .must(m -> m.term(t -> t.field("status").value((long) PUBLIC.getStatus())))
@@ -57,11 +66,11 @@ public class EsSearchStrategyImpl implements SearchStrategy {
         HighlightFieldParameters contentParams = HighlightFieldParameters.builder()
                 .withPreTags(PRE_TAG)
                 .withPostTags(POST_TAG)
-                .withFragmentSize(50)
+                .withFragmentSize(CONTENT_FRAGMENT_SIZE)
                 .build();
 
-        HighlightField titleField = new HighlightField("articleTitle", titleParams);
-        HighlightField contentField = new HighlightField("articleContent", contentParams);
+        HighlightField titleField = new HighlightField(ARTICLE_TITLE_FIELD, titleParams);
+        HighlightField contentField = new HighlightField(ARTICLE_CONTENT_FIELD, contentParams);
         Highlight highlight = new Highlight(Arrays.asList(titleField, contentField));
         HighlightQuery highlightQuery = new HighlightQuery(highlight, ArticleSearchDTO.class);
 
@@ -76,16 +85,22 @@ public class EsSearchStrategyImpl implements SearchStrategy {
             SearchHits<ArticleSearchDTO> search = elasticsearchOperations.search(nativeQuery, ArticleSearchDTO.class);
             return search.getSearchHits().stream().map(hit -> {
                 ArticleSearchDTO article = hit.getContent();
-                List<String> titleHighLightList = hit.getHighlightFields().get("articleTitle");
-                if (CollectionUtils.isNotEmpty(titleHighLightList)) {
-                    article.setArticleTitle(titleHighLightList.get(0));
+                if (article == null) {
+                    return null;
                 }
-                List<String> contentHighLightList = hit.getHighlightFields().get("articleContent");
-                if (CollectionUtils.isNotEmpty(contentHighLightList)) {
-                    article.setArticleContent(contentHighLightList.get(contentHighLightList.size() - 1));
+                Map<String, List<String>> highlightFields = hit.getHighlightFields();
+                if (highlightFields != null) {
+                    List<String> titleHighLightList = highlightFields.get(ARTICLE_TITLE_FIELD);
+                    if (CollectionUtils.isNotEmpty(titleHighLightList)) {
+                        article.setArticleTitle(titleHighLightList.get(0));
+                    }
+                    List<String> contentHighLightList = highlightFields.get(ARTICLE_CONTENT_FIELD);
+                    if (CollectionUtils.isNotEmpty(contentHighLightList)) {
+                        article.setArticleContent(contentHighLightList.get(contentHighLightList.size() - 1));
+                    }
                 }
                 return article;
-            }).collect(Collectors.toList());
+            }).filter(Objects::nonNull).collect(Collectors.toList());
         } catch (Exception e) {
             log.error("ES 搜索失败", e);
         }

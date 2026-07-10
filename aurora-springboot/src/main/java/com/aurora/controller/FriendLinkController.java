@@ -3,20 +3,25 @@ package com.aurora.controller;
 import com.aurora.annotation.OptLog;
 import com.aurora.model.dto.FriendLinkAdminDTO;
 import com.aurora.model.dto.FriendLinkDTO;
-import com.aurora.model.vo.ResultVO;
-import com.aurora.service.FriendLinkService;
+import com.aurora.model.dto.PageResultDTO;
 import com.aurora.model.vo.ConditionVO;
 import com.aurora.model.vo.FriendLinkVO;
-import com.aurora.model.dto.PageResultDTO;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import com.aurora.model.vo.ResultVO;
+import com.aurora.service.FriendLinkService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import java.util.List;
 
-import static com.aurora.constant.OptTypeConstant.*;
+import static com.aurora.constant.OptTypeConstant.DELETE;
+import static com.aurora.constant.OptTypeConstant.SAVE_OR_UPDATE;
 
 @Tag(name = "友链模块")
 @RestController

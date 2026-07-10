@@ -13,6 +13,8 @@ import java.io.InputStream;
 @Service("minioUploadStrategyImpl")
 public class MinioUploadStrategyImpl extends AbstractUploadStrategyImpl {
 
+    private static final int UNKNOWN_PART_SIZE = -1;
+
     @Autowired
     private MinioProperties minioProperties;
 
@@ -33,7 +35,7 @@ public class MinioUploadStrategyImpl extends AbstractUploadStrategyImpl {
         try {
             getMinioClient().putObject(
                     PutObjectArgs.builder().bucket(minioProperties.getBucketName()).object(path + fileName).stream(
-                                    inputStream, inputStream.available(), -1)
+                                    inputStream, inputStream.available(), UNKNOWN_PART_SIZE)
                             .build());
         } catch (Exception e) {
             throw new IOException(e);

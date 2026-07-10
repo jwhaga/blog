@@ -3,16 +3,28 @@ package com.aurora.controller;
 import com.aurora.annotation.OptLog;
 import com.aurora.model.dto.JobDTO;
 import com.aurora.model.dto.PageResultDTO;
+import com.aurora.model.vo.JobRunVO;
+import com.aurora.model.vo.JobSearchVO;
+import com.aurora.model.vo.JobStatusVO;
+import com.aurora.model.vo.JobVO;
+import com.aurora.model.vo.ResultVO;
 import com.aurora.service.JobService;
-import com.aurora.model.vo.*;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import static com.aurora.constant.OptTypeConstant.*;
+import static com.aurora.constant.OptTypeConstant.DELETE;
+import static com.aurora.constant.OptTypeConstant.SAVE;
+import static com.aurora.constant.OptTypeConstant.UPDATE;
 
 @Tag(name = "定时任务模块")
 @RestController

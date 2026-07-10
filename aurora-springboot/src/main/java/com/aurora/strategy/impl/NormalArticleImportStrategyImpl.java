@@ -1,7 +1,6 @@
 package com.aurora.strategy.impl;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.util.StrUtil;
 import com.aurora.exception.BizException;
 import com.aurora.service.ArticleService;
 import com.aurora.strategy.ArticleImportStrategy;
@@ -21,6 +20,9 @@ import static com.aurora.enums.ArticleStatusEnum.DRAFT;
 @Slf4j
 @Service("normalArticleImportStrategyImpl")
 public class NormalArticleImportStrategyImpl implements ArticleImportStrategy {
+
+    private static final String IMPORT_FAIL_MESSAGE = "导入文章失败";
+
     @Autowired
     private ArticleService articleService;
 
@@ -33,8 +35,8 @@ public class NormalArticleImportStrategyImpl implements ArticleImportStrategy {
                 articleContent.append((char) reader.read());
             }
         } catch (IOException e) {
-            log.error(StrUtil.format("导入文章失败, 堆栈:{}", ExceptionUtil.stacktraceToString(e)));
-            throw new BizException("导入文章失败");
+            log.error(IMPORT_FAIL_MESSAGE + ", 堆栈:{}", ExceptionUtil.stacktraceToString(e));
+            throw new BizException(IMPORT_FAIL_MESSAGE);
         }
         ArticleVO articleVO = ArticleVO.builder()
                 .articleTitle(articleTitle)
