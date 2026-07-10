@@ -127,22 +127,28 @@ export default {
           this.resources = data.data
           this.loading = false
         })
+        .catch(() => {
+          this.loading = false
+        })
     },
     changeResource(resource) {
-      this.axios.post('/api/admin/resources', resource).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listResources()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-      })
+      this.axios
+        .post('/api/admin/resources', resource)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listResources()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+        })
+        .catch(() => {})
     },
     openModel(resource) {
       if (resource != null) {
@@ -164,49 +170,54 @@ export default {
       this.addResource = true
     },
     openAddResourceModel(resource) {
-      console.log(resource)
       this.resourceForm = {}
       this.resourceForm.parentId = resource.id
       this.$refs.resourceTitle.innerHTML = '添加资源'
       this.addResource = true
     },
     deleteResource(id) {
-      this.axios.delete('/api/admin/resources/' + id).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listResources()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-      })
+      this.axios
+        .delete('/api/admin/resources/' + id)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listResources()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+        })
+        .catch(() => {})
     },
     addOrEditResource() {
-      if (this.resourceForm.resourceName.trim() == '') {
+      if (this.resourceForm.resourceName.trim() === '') {
         this.$message.error('资源名不能为空')
         return false
       }
-      this.axios.post('/api/admin/resources', this.resourceForm).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listResources()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-        this.addModule = false
-        this.addResource = false
-      })
+      this.axios
+        .post('/api/admin/resources', this.resourceForm)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listResources()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+          this.addModule = false
+          this.addResource = false
+        })
+        .catch(() => {})
     }
   },
   computed: {

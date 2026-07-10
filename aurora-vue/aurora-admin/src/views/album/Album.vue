@@ -100,6 +100,10 @@
 
 <script>
 import * as imageConversion from 'image-conversion'
+
+const TOKEN_STORAGE_KEY = 'token'
+const DELETE_PHOTO_PATH = '/photos/delete'
+
 export default {
   created() {
     this.listAlbums()
@@ -121,13 +125,12 @@ export default {
       current: 1,
       size: 8,
       count: 0,
-      headers: { Authorization: 'Bearer ' + sessionStorage.getItem('token') }
+      headers: { Authorization: 'Bearer ' + sessionStorage.getItem(TOKEN_STORAGE_KEY) }
     }
   },
   methods: {
     openModel(item) {
       if (item) {
-        console.log(item)
         this.albumForum = JSON.parse(item)
         this.$refs.albumTitle.innerHTML = '修改相册'
       } else {
@@ -146,7 +149,7 @@ export default {
       this.$router.push({ path: '/albums/' + item.id })
     },
     checkDelete() {
-      this.$router.push({ path: '/photos/delete' })
+      this.$router.push({ path: DELETE_PHOTO_PATH })
     },
     listAlbums() {
       this.axios
@@ -162,13 +165,39 @@ export default {
           this.count = data.data.count
           this.loading = false
         })
+        .catch(() => {
+          this.loading = false
+        })
     },
     addOrEditAlbum() {
-      if (this.albumForum.albumName.trim() == '') {
+      if (!this.validateAlbum()) {
+        return false
+      }
+      this.axios
+        .post('/api/admin/photos/albums', this.albumForum)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listAlbums()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+        })
+        .catch(() => {})
+      this.addOrEdit = false
+    },
+    validateAlbum() {
+      if (this.albumForum.albumName.trim() === '') {
         this.$message.error('相册名称不能为空')
         return false
       }
-      if (this.albumForum.albumDesc.trim() == '') {
+      if (this.albumForum.albumDesc.trim() === '') {
         this.$message.error('相册描述不能为空')
         return false
       }
@@ -176,21 +205,7 @@ export default {
         this.$message.error('相册封面不能为空')
         return false
       }
-      this.axios.post('/api/admin/photos/albums', this.albumForum).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listAlbums()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-      })
-      this.addOrEdit = false
+      return true
     },
     uploadCover(response) {
       this.albumForum.albumCover = response.data
@@ -199,6 +214,7 @@ export default {
       return new Promise((resolve) => {
         if (file.size / 1024 < this.config.UPLOAD_SIZE) {
           resolve(file)
+          return
         }
         imageConversion.compressAccurately(file, this.config.UPLOAD_SIZE).then((res) => {
           resolve(res)
@@ -208,30 +224,32 @@ export default {
     handleCommand(command) {
       const type = command.substring(0, 6)
       const data = command.substring(6)
-      if (type == 'delete') {
+      if (type === 'delete') {
         this.albumForum.id = data
         this.isdelete = true
       } else {
-        console.log(data)
         this.openModel(data)
       }
     },
     deleteAlbum() {
-      this.axios.delete('/api/admin/photos/albums/' + this.albumForum.id).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listAlbums()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-        this.isdelete = false
-      })
+      this.axios
+        .delete('/api/admin/photos/albums/' + this.albumForum.id)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listAlbums()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+          this.isdelete = false
+        })
+        .catch(() => {})
     },
     searchAlbums() {
       this.current = 1

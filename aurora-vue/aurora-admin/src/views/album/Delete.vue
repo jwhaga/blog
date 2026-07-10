@@ -92,6 +92,9 @@ export default {
           this.count = data.data.count
           this.loading = false
         })
+        .catch(() => {
+          this.loading = false
+        })
     },
     sizeChange(size) {
       this.size = size
@@ -102,43 +105,45 @@ export default {
       this.listPhotos()
     },
     updatePhotoDelete(id) {
-      var param = {}
-      if (id == null) {
-        param = { ids: this.selectPhotoIds, isDelete: 0 }
-      } else {
-        param = { ids: [id], isDelete: 0 }
-      }
-      this.axios.put('/api/admin/photos/delete', param).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listPhotos()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-      })
+      const param =
+        id == null ? { ids: this.selectPhotoIds, isDelete: 0 } : { ids: [id], isDelete: 0 }
+      this.axios
+        .put('/api/admin/photos/delete', param)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listPhotos()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+        })
+        .catch(() => {})
       this.batchDeletePhoto = false
     },
     deletePhotos() {
-      this.axios.delete('/api/admin/photos', { data: this.selectPhotoIds }).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listPhotos()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-      })
+      this.axios
+        .delete('/api/admin/photos', { data: this.selectPhotoIds })
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listPhotos()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+        })
+        .catch(() => {})
       this.batchDeletePhoto = false
     },
     handleCheckAllChange(val) {
@@ -146,17 +151,14 @@ export default {
       this.isIndeterminate = false
     },
     handleCheckedPhotoChange(value) {
-      let checkedCount = value.length
+      const checkedCount = value.length
       this.checkAll = checkedCount === this.photoIds.length
       this.isIndeterminate = checkedCount > 0 && checkedCount < this.photoIds.length
     }
   },
   watch: {
     photos() {
-      this.photoIds = []
-      this.photos.forEach((item) => {
-        this.photoIds.push(item.id)
-      })
+      this.photoIds = this.photos.map((item) => item.id)
     }
   }
 }

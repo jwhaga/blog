@@ -40,12 +40,17 @@
 
 <script>
 import { resetRouter } from '@/router'
+
+const SETTING_PATH = '/setting'
+const LOGIN_PATH = '/login'
+const HOME_PATH = '/'
+
 export default {
   created() {
     let matched = this.$route.matched.filter((item) => item.name)
     const first = matched[0]
     if (first && first.name !== '首页') {
-      matched = [{ path: '/', name: '首页' }].concat(matched)
+      matched = [{ path: HOME_PATH, name: '首页' }].concat(matched)
     }
     this.breadcrumbs = matched
     this.$store.commit('saveTab', this.$route)
@@ -63,8 +68,8 @@ export default {
     },
     removeTab(tab) {
       this.$store.commit('removeTab', tab)
-      if (tab.path == this.$route.path) {
-        var tabList = this.$store.state.tabList
+      if (tab.path === this.$route.path) {
+        const tabList = this.$store.state.tabList
         this.$router.push({ path: tabList[tabList.length - 1].path })
       }
     },
@@ -72,52 +77,61 @@ export default {
       this.$store.commit('trigger')
     },
     handleCommand(command) {
-      if (command == 'setting') {
-        this.$router.push({ path: '/setting' })
+      if (command === 'setting') {
+        this.$router.push({ path: SETTING_PATH })
       }
-      if (command == 'logout') {
-        this.axios.post('/api/users/logout').then(({ data }) => {
-          this.$store.commit('logout')
-          this.$store.commit('resetTab')
-          resetRouter()
-          this.$router.push({ path: '/login' })
-        })
+      if (command === 'logout') {
+        this.axios
+          .post('/api/users/logout')
+          .then(() => {
+            this.$store.commit('logout')
+            this.$store.commit('resetTab')
+            resetRouter()
+            this.$router.push({ path: LOGIN_PATH })
+          })
+          .catch(() => {})
       }
     },
     closeAllTab() {
       this.$store.commit('resetTab')
-      this.$router.push({ path: '/' })
+      this.$router.push({ path: HOME_PATH })
     },
     fullScreen() {
-      let element = document.documentElement
+      const element = document.documentElement
       if (this.fullscreen) {
-        if (document.exitFullscreen) {
-          document.exitFullscreen()
-        } else if (document.webkitCancelFullScreen) {
-          document.webkitCancelFullScreen()
-        } else if (document.mozCancelFullScreen) {
-          document.mozCancelFullScreen()
-        } else if (document.msExitFullscreen) {
-          document.msExitFullscreen()
-        }
+        this.exitFullscreen()
       } else {
-        if (element.requestFullscreen) {
-          element.requestFullscreen()
-        } else if (element.webkitRequestFullScreen) {
-          element.webkitRequestFullScreen()
-        } else if (element.mozRequestFullScreen) {
-          element.mozRequestFullScreen()
-        } else if (element.msRequestFullscreen) {
-          element.msRequestFullscreen()
-        }
+        this.requestFullscreen(element)
       }
       this.fullscreen = !this.fullscreen
+    },
+    exitFullscreen() {
+      if (document.exitFullscreen) {
+        document.exitFullscreen()
+      } else if (document.webkitCancelFullScreen) {
+        document.webkitCancelFullScreen()
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen()
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen()
+      }
+    },
+    requestFullscreen(element) {
+      if (element.requestFullscreen) {
+        element.requestFullscreen()
+      } else if (element.webkitRequestFullScreen) {
+        element.webkitRequestFullScreen()
+      } else if (element.mozRequestFullScreen) {
+        element.mozRequestFullScreen()
+      } else if (element.msRequestFullscreen) {
+        element.msRequestFullscreen()
+      }
     }
   },
   computed: {
     isActive() {
       return function (tab) {
-        if (tab.path == this.$route.path) {
+        if (tab.path === this.$route.path) {
           return 'tabs-view-item-active'
         }
         return 'tabs-view-item'

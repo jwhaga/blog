@@ -164,10 +164,13 @@
 
 <script>
 import * as imageConversion from 'image-conversion'
+
+const TOKEN_STORAGE_KEY = 'token'
+
 export default {
   created() {
     this.albumId = this.$route.params.albumId
-    if (this.albumId == this.$store.state.pageState.photo.albumId) {
+    if (this.albumId === this.$store.state.pageState.photo.albumId) {
       this.current = this.$store.state.pageState.photo.current
     } else {
       this.current = 1
@@ -210,19 +213,25 @@ export default {
       current: 1,
       size: 18,
       count: 0,
-      headers: { Authorization: 'Bearer ' + sessionStorage.getItem('token') }
+      headers: { Authorization: 'Bearer ' + sessionStorage.getItem(TOKEN_STORAGE_KEY) }
     }
   },
   methods: {
     getAlbumInfo() {
-      this.axios.get('/api/admin/photos/albums/' + this.$route.params.albumId + '/info').then(({ data }) => {
-        this.albumInfo = data.data
-      })
+      this.axios
+        .get('/api/admin/photos/albums/' + this.$route.params.albumId + '/info')
+        .then(({ data }) => {
+          this.albumInfo = data.data
+        })
+        .catch(() => {})
     },
     listAlbums() {
-      this.axios.get('/api/admin/photos/albums/info').then(({ data }) => {
-        this.albumList = data.data
-      })
+      this.axios
+        .get('/api/admin/photos/albums/info')
+        .then(({ data }) => {
+          this.albumList = data.data
+        })
+        .catch(() => {})
     },
     listPhotos() {
       this.axios
@@ -239,6 +248,9 @@ export default {
           this.count = data.data.count
           this.loading = false
         })
+        .catch(() => {
+          this.loading = false
+        })
     },
     currentChange(current) {
       this.current = current
@@ -249,10 +261,7 @@ export default {
       this.listPhotos()
     },
     savePhotos() {
-      var photoUrls = []
-      this.uploads.forEach((item) => {
-        photoUrls.push(item.url)
-      })
+      const photoUrls = this.uploads.map((item) => item.url)
       this.axios
         .post('/api/admin/photos', {
           albumId: this.$route.params.albumId,
@@ -274,28 +283,32 @@ export default {
             })
           }
         })
+        .catch(() => {})
       this.uploadPhoto = false
     },
     updatePhoto() {
-      if (this.photoForm.photoName.trim() == '') {
+      if (this.photoForm.photoName.trim() === '') {
         this.$message.error('照片名称不能为空')
         return false
       }
-      this.axios.put('/api/admin/photos', this.photoForm).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listPhotos()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-        this.editPhoto = false
-      })
+      this.axios
+        .put('/api/admin/photos', this.photoForm)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listPhotos()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+          this.editPhoto = false
+        })
+        .catch(() => {})
     },
     updatePhotoAlbum() {
       this.axios
@@ -319,10 +332,11 @@ export default {
           }
           this.movePhoto = false
         })
+        .catch(() => {})
     },
     handleRemove(file) {
       this.uploads.forEach((item, index) => {
-        if (item.url == file.url) {
+        if (item.url === file.url) {
           this.uploads.splice(index, 1)
         }
       })
@@ -334,11 +348,14 @@ export default {
       return new Promise((resolve) => {
         if (file.size / 1024 < this.config.UPLOAD_SIZE) {
           resolve(file)
-        } else {
-          imageConversion.compressAccurately(file, this.config.UPLOAD_SIZE).then((res) => {
-            resolve(res)
-          }).catch(() => resolve(file))
+          return
         }
+        imageConversion
+          .compressAccurately(file, this.config.UPLOAD_SIZE)
+          .then((res) => {
+            resolve(res)
+          })
+          .catch(() => resolve(file))
       })
     },
     handleCheckAllChange(val) {
@@ -346,7 +363,7 @@ export default {
       this.isIndeterminate = false
     },
     handleCheckedPhotoChange(value) {
-      let checkedCount = value.length
+      const checkedCount = value.length
       this.checkAll = checkedCount === this.photoIds.length
       this.isIndeterminate = checkedCount > 0 && checkedCount < this.photoIds.length
     },
@@ -355,36 +372,32 @@ export default {
       this.editPhoto = true
     },
     updatePhotoDelete(id) {
-      var param = {}
-      if (id == null) {
-        param = { ids: this.selectphotoIds, isDelete: 1 }
-      } else {
-        param = { ids: [id], isDelete: 1 }
-      }
-      this.axios.put('/api/admin/photos/delete', param).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listPhotos()
-          this.getAlbumInfo()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-      })
+      const param =
+        id == null ? { ids: this.selectphotoIds, isDelete: 1 } : { ids: [id], isDelete: 1 }
+      this.axios
+        .put('/api/admin/photos/delete', param)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listPhotos()
+            this.getAlbumInfo()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+        })
+        .catch(() => {})
       this.batchDeletePhoto = false
     }
   },
   watch: {
     photos() {
-      this.photoIds = []
-      this.photos.forEach((item) => {
-        this.photoIds.push(item.id)
-      })
+      this.photoIds = this.photos.map((item) => item.id)
     }
   }
 }

@@ -156,12 +156,12 @@
 <script>
 export default {
   created() {
-    if (this.$route.params.quartzId == 'all') {
+    if (this.$route.params.quartzId === 'all') {
       this.jobId = 0
     } else if (this.$route.params.quartzId !== null) {
       this.jobId = this.$route.params.quartzId
     }
-    if (this.jobId == this.$store.state.pageState.quartzLog.jobId) {
+    if (this.jobId === this.$store.state.pageState.quartzLog.jobId) {
       this.current = this.$store.state.pageState.quartzLog.current
     } else {
       this.current = 1
@@ -191,22 +191,18 @@ export default {
   },
   methods: {
     selectionChange(jobLogs) {
-      this.jobLogIds = []
-      jobLogs.forEach((item) => {
-        this.jobLogIds.push(item.id)
-      })
+      this.jobLogIds = jobLogs.map((item) => item.id)
     },
     listJobGroups() {
-      this.axios.get('/api/admin/jobLogs/jobGroups').then(({ data }) => {
-        this.jobGroups = data.data
-      })
+      this.axios
+        .get('/api/admin/jobLogs/jobGroups')
+        .then(({ data }) => {
+          this.jobGroups = data.data
+        })
+        .catch(() => {})
     },
     listJobLogs() {
-      if (this.jobId === 0) {
-        this.searchParams.jobId = null
-      } else {
-        this.searchParams.jobId = this.jobId
-      }
+      this.searchParams.jobId = this.jobId === 0 ? null : this.jobId
       this.searchParams.current = this.current
       this.searchParams.size = this.size
       this.searchParams.startTime = this.dateRange[0]
@@ -218,6 +214,9 @@ export default {
         .then(({ data }) => {
           this.jobLogs = data.data.records
           this.count = data.data.count
+          this.loading = false
+        })
+        .catch(() => {
           this.loading = false
         })
     },
@@ -247,38 +246,43 @@ export default {
       this.listJobLogs()
     },
     deleteJobLogs() {
-      let param = {}
-      param = { data: this.jobLogIds }
-      this.axios.delete('/api/admin/jobLogs', param).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: '删除成功'
-          })
-          this.listJobLogs()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: '删除失败'
-          })
-        }
-      })
+      const param = { data: this.jobLogIds }
+      this.axios
+        .delete('/api/admin/jobLogs', param)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: '删除成功'
+            })
+            this.listJobLogs()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: '删除失败'
+            })
+          }
+        })
+        .catch(() => {})
     },
     clean() {
-      this.axios.delete('/api/admin/jobLogs/clean').then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: '清空成功'
-          })
-          this.listJobLogs()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: '清空失败'
-          })
-        }
-      })
+      this.axios
+        .delete('/api/admin/jobLogs/clean')
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: '清空成功'
+            })
+            this.listJobLogs()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: '清空失败'
+            })
+          }
+        })
+        .catch(() => {})
     },
     changeOpen(jobLog) {
       this.jobLog = jobLog

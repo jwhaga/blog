@@ -11,7 +11,7 @@ export default {
     if (this.$store.state.userInfo != null) {
       generaMenu()
     }
-    this.axios.post('/api/report')
+    this.axios.post('/api/report').catch(() => {})
   }
 }
 </script>

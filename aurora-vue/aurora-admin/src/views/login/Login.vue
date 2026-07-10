@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="login-container" :style="{ background: 'url(' + bgUrl + ') center center / cover no-repeat' }">
     <div class="login-card">
       <div class="login-title">管理员登录</div>
@@ -42,24 +42,25 @@ export default {
   methods: {
     login() {
       this.$refs.ruleForm.validate((valid) => {
-        if (valid) {
-          const that = this
-          let param = new URLSearchParams()
-          param.append('username', that.loginForm.username)
-          param.append('password', that.loginForm.password)
-          that.axios.post('/api/users/login', param).then(({ data }) => {
-            if (data.flag) {
-              that.$store.commit('login', data.data)
-              generaMenu()
-              that.$message.success('登录成功')
-              that.$router.push({ path: '/' })
-            } else {
-              that.$message.error(data.message)
-            }
-          })
-        } else {
+        if (!valid) {
           return false
         }
+        const param = new URLSearchParams()
+        param.append('username', this.loginForm.username)
+        param.append('password', this.loginForm.password)
+        this.axios
+          .post('/api/users/login', param)
+          .then(({ data }) => {
+            if (data.flag) {
+              this.$store.commit('login', data.data)
+              generaMenu()
+              this.$message.success('登录成功')
+              this.$router.push({ path: '/' })
+            } else {
+              this.$message.error(data.message)
+            }
+          })
+          .catch(() => {})
       })
     }
   }

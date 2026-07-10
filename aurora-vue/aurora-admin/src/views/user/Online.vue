@@ -57,6 +57,9 @@
 <script>
 import router from '@/router'
 
+const TOKEN_STORAGE_KEY = 'token'
+const LOGIN_PATH = '/login'
+
 export default {
   created() {
     this.current = this.$store.state.pageState.online
@@ -89,6 +92,9 @@ export default {
           this.count = data.data.count
           this.loading = false
         })
+        .catch(() => {
+          this.loading = false
+        })
     },
     sizeChange(size) {
       this.size = size
@@ -100,24 +106,27 @@ export default {
       this.listOnlineUsers()
     },
     removeOnlineUser(user) {
-      this.axios.delete('/api/admin/users/' + user.userInfoId + '/online').then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          if (user.userInfoId == this.$store.state.userInfo.id) {
-            router.push({ path: '/login' })
-            sessionStorage.removeItem('token')
+      this.axios
+        .delete('/api/admin/users/' + user.userInfoId + '/online')
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            if (user.userInfoId === this.$store.state.userInfo.id) {
+              router.push({ path: LOGIN_PATH })
+              sessionStorage.removeItem(TOKEN_STORAGE_KEY)
+            }
+            this.listOnlineUsers()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
           }
-          this.listOnlineUsers()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-      })
+        })
+        .catch(() => {})
     }
   },
   computed: {

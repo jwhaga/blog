@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <el-card class="main-card">
     <div class="title">{{ this.$route.name }}</div>
     <div class="article-status-menu">
@@ -225,6 +225,23 @@
 </template>
 
 <script>
+const TOKEN_STORAGE_KEY = 'token'
+const DOWNLOAD_IFRAME_TIMEOUT = 5 * 60 * 1000
+// 文章状态映射：status 值 -> { isDelete, status }
+const STATUS_MAP = {
+  all: { isDelete: 0, status: null },
+  public: { isDelete: 0, status: 1 },
+  private: { isDelete: 0, status: 2 },
+  draft: { isDelete: 0, status: 3 },
+  delete: { isDelete: 1, status: null }
+}
+// 文章类型映射
+const ARTICLE_TYPE_MAP = {
+  1: { tagType: 'danger', name: '原创' },
+  2: { tagType: 'success', name: '转载' },
+  3: { tagType: 'primary', name: '翻译' }
+}
+
 export default {
   created() {
     this.current = this.$store.state.pageState.articleList
@@ -234,7 +251,7 @@ export default {
   },
   data: function () {
     return {
-      uploadHeaders: { Authorization: 'Bearer ' + sessionStorage.getItem('token') },
+      uploadHeaders: { Authorization: 'Bearer ' + sessionStorage.getItem(TOKEN_STORAGE_KEY) },
       loading: true,
       updateIsDelete: false,
       remove: false,
@@ -284,77 +301,73 @@ export default {
       this.$router.push({ path: '/articles/' + id })
     },
     updateArticleDelete(id) {
-      let param = {}
-      if (id != null) {
-        param.ids = [id]
-      } else {
-        param.ids = this.articleIds
+      const param = {
+        ids: id != null ? [id] : this.articleIds,
+        isDelete: this.isDelete === 0 ? 1 : 0
       }
-      param.isDelete = this.isDelete == 0 ? 1 : 0
-      this.axios.put('/api/admin/articles', param).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listArticles()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-        this.updateIsDelete = false
-      })
+      this.axios
+        .put('/api/admin/articles', param)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listArticles()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+          this.updateIsDelete = false
+        })
+        .catch(() => {})
     },
     deleteArticles(id) {
-      let param = {}
-      if (id == null) {
-        param = { data: this.articleIds }
-      } else {
-        param = { data: [id] }
-      }
-      this.axios.delete('/api/admin/articles/delete', param).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listArticles()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-        this.remove = false
-      })
+      const param = id == null ? { data: this.articleIds } : { data: [id] }
+      this.axios
+        .delete('/api/admin/articles/delete', param)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listArticles()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+          this.remove = false
+        })
+        .catch(() => {})
     },
     exportArticles(id) {
-      var param = {}
-      if (id == null) {
-        param = this.articleIds
-      } else {
-        param = [id]
-      }
-      this.axios.post('/api/admin/articles/export', param).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          data.data.forEach((item) => {
-            this.downloadFile(item)
-          })
-          this.listArticles()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-        this.isExport = false
-      })
+      const param = id == null ? this.articleIds : [id]
+      this.axios
+        .post('/api/admin/articles/export', param)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            data.data.forEach((item) => {
+              this.downloadFile(item)
+            })
+            this.listArticles()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+          this.isExport = false
+        })
+        .catch(() => {})
     },
     downloadFile(url) {
       const iframe = document.createElement('iframe')
@@ -364,7 +377,7 @@ export default {
       document.body.appendChild(iframe)
       setTimeout(() => {
         iframe.remove()
-      }, 5 * 60 * 1000)
+      }, DOWNLOAD_IFRAME_TIMEOUT)
     },
     uploadArticle(data) {
       if (data.flag) {
@@ -390,27 +403,10 @@ export default {
       this.listArticles()
     },
     changeStatus(status) {
-      switch (status) {
-        case 'all':
-          this.isDelete = 0
-          this.status = null
-          break
-        case 'public':
-          this.isDelete = 0
-          this.status = 1
-          break
-        case 'private':
-          this.isDelete = 0
-          this.status = 2
-          break
-        case 'draft':
-          this.isDelete = 0
-          this.status = 3
-          break
-        case 'delete':
-          this.isDelete = 1
-          this.status = null
-          break
+      const statusConfig = STATUS_MAP[status]
+      if (statusConfig) {
+        this.isDelete = statusConfig.isDelete
+        this.status = statusConfig.status
       }
       this.current = 1
       this.activeStatus = status
@@ -436,6 +432,7 @@ export default {
           }
           this.remove = false
         })
+        .catch(() => {})
     },
     listArticles() {
       this.axios
@@ -456,16 +453,25 @@ export default {
           this.count = data.data.count
           this.loading = false
         })
+        .catch(() => {
+          this.loading = false
+        })
     },
     listCategories() {
-      this.axios.get('/api/admin/categories/search').then(({ data }) => {
-        this.categories = data.data
-      })
+      this.axios
+        .get('/api/admin/categories/search')
+        .then(({ data }) => {
+          this.categories = data.data
+        })
+        .catch(() => {})
     },
     listTags() {
-      this.axios.get('/api/admin/tags/search').then(({ data }) => {
-        this.tags = data.data
-      })
+      this.axios
+        .get('/api/admin/tags/search')
+        .then(({ data }) => {
+          this.tags = data.data
+        })
+        .catch(() => {})
     }
   },
   watch: {
@@ -493,31 +499,12 @@ export default {
   computed: {
     articleType() {
       return function (type) {
-        var tagType = ''
-        var name = ''
-        switch (type) {
-          case 1:
-            tagType = 'danger'
-            name = '原创'
-            break
-          case 2:
-            tagType = 'success'
-            name = '转载'
-            break
-          case 3:
-            tagType = 'primary'
-            name = '翻译'
-            break
-        }
-        return {
-          tagType: tagType,
-          name: name
-        }
+        return ARTICLE_TYPE_MAP[type] || { tagType: '', name: '' }
       }
     },
     isActive() {
       return function (status) {
-        return this.activeStatus == status ? 'active-status' : 'status'
+        return this.activeStatus === status ? 'active-status' : 'status'
       }
     }
   }

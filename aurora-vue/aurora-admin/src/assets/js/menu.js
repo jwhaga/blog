@@ -4,20 +4,30 @@ import store from '@/store'
 import axios from 'axios'
 import Vue from 'vue'
 
+const LAYOUT_COMPONENT = 'Layout'
+const ICONFONT_PREFIX = 'iconfont '
+const LOGIN_PATH = '/login'
+
 export function generaMenu() {
-  axios.get('/api/admin/user/menus').then(({ data }) => {
-    if (data.flag) {
-      let userMenus = data.data
+  axios
+    .get('/api/admin/user/menus')
+    .then(({ data }) => {
+      if (!data.flag) {
+        Vue.prototype.$message.error(data.message)
+        router.push({ path: LOGIN_PATH })
+        return
+      }
+      const userMenus = data.data
       userMenus.forEach((item) => {
         if (item.icon != null) {
-          item.icon = 'iconfont ' + item.icon
+          item.icon = ICONFONT_PREFIX + item.icon
         }
-        if (item.component == 'Layout') {
+        if (item.component === LAYOUT_COMPONENT) {
           item.component = Layout
         }
         if (item.children && item.children.length > 0) {
           item.children.forEach((route) => {
-            route.icon = 'iconfont ' + route.icon
+            route.icon = ICONFONT_PREFIX + route.icon
             route.component = loadView(route.component)
           })
         }
@@ -26,11 +36,8 @@ export function generaMenu() {
       userMenus.forEach((item) => {
         router.addRoute(item)
       })
-    } else {
-      Vue.prototype.$message.error(data.message)
-      router.push({ path: '/login' })
-    }
-  })
+    })
+    .catch(() => {})
 }
 
 export const loadView = (view) => {

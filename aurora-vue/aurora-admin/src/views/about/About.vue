@@ -12,6 +12,7 @@
 
 <script>
 import * as imageConversion from 'image-conversion'
+
 export default {
   created() {
     this.getAbout()
@@ -23,25 +24,35 @@ export default {
   },
   methods: {
     getAbout() {
-      this.axios.get('/api/about').then(({ data }) => {
-        this.aboutContent = data.data.content
-      })
+      this.axios
+        .get('/api/about')
+        .then(({ data }) => {
+          this.aboutContent = data.data.content
+        })
+        .catch(() => {})
     },
     uploadImg(pos, file) {
-      var formdata = new FormData()
+      const formData = new FormData()
       if (file.size / 1024 < this.config.UPLOAD_SIZE) {
-        formdata.append('file', file)
-        this.axios.post('/api/admin/articles/images', formdata).then(({ data }) => {
+        this.uploadImageFile(formData, file, pos)
+      } else {
+        imageConversion
+          .compressAccurately(file, this.config.UPLOAD_SIZE)
+          .then((res) => {
+            const compressedFile = new window.File([res], file.name, { type: file.type })
+            this.uploadImageFile(formData, compressedFile, pos)
+          })
+          .catch(() => {})
+      }
+    },
+    uploadImageFile(formData, file, pos) {
+      formData.append('file', file)
+      this.axios
+        .post('/api/admin/articles/images', formData)
+        .then(({ data }) => {
           this.$refs.md.$img2Url(pos, data.data)
         })
-      } else {
-        imageConversion.compressAccurately(file, this.config.UPLOAD_SIZE).then((res) => {
-          formdata.append('file', new window.File([res], file.name, { type: file.type }))
-          this.axios.post('/api/admin/articles/images', formdata).then(({ data }) => {
-            this.$refs.md.$img2Url(pos, data.data)
-          })
-        })
-      }
+        .catch(() => {})
     },
     updateAbout() {
       this.axios
@@ -61,6 +72,7 @@ export default {
             })
           }
         })
+        .catch(() => {})
     }
   }
 }

@@ -223,6 +223,8 @@
 <script>
 import * as imageConversion from 'image-conversion'
 
+const TOKEN_STORAGE_KEY = 'token'
+
 export default {
   created() {
     this.getWebsiteConfig()
@@ -231,14 +233,17 @@ export default {
     return {
       websiteConfigForm: {},
       activeName: 'info',
-      headers: { Authorization: 'Bearer ' + sessionStorage.getItem('token') }
+      headers: { Authorization: 'Bearer ' + sessionStorage.getItem(TOKEN_STORAGE_KEY) }
     }
   },
   methods: {
     getWebsiteConfig() {
-      this.axios.get('/api/admin/website/config').then(({ data }) => {
-        this.websiteConfigForm = data.data
-      })
+      this.axios
+        .get('/api/admin/website/config')
+        .then(({ data }) => {
+          this.websiteConfigForm = data.data
+        })
+        .catch(() => {})
     },
     handleAuthorAvatarSuccess(response) {
       this.websiteConfigForm.authorAvatar = response.data
@@ -265,26 +270,35 @@ export default {
       return new Promise((resolve) => {
         if (file.size / 1024 < this.config.UPLOAD_SIZE) {
           resolve(file)
+          return
         }
-        imageConversion.compressAccurately(file, this.config.UPLOAD_SIZE).then((res) => {
-          resolve(res)
-        })
+        imageConversion
+          .compressAccurately(file, this.config.UPLOAD_SIZE)
+          .then((res) => {
+            resolve(res)
+          })
+          .catch(() => {
+            resolve(file)
+          })
       })
     },
     updateWebsiteConfig() {
-      this.axios.put('/api/admin/website/config', this.websiteConfigForm).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-      })
+      this.axios
+        .put('/api/admin/website/config', this.websiteConfigForm)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+        })
+        .catch(() => {})
     }
   }
 }

@@ -106,10 +106,7 @@ export default {
   },
   methods: {
     selectionChange(categories) {
-      this.categoryIds = []
-      categories.forEach((item) => {
-        this.categoryIds.push(item.id)
-      })
+      this.categoryIds = categories.map((item) => item.id)
     },
     searchCategories() {
       this.current = 1
@@ -125,27 +122,25 @@ export default {
       this.listCategories()
     },
     deleteCategory(id) {
-      let param = {}
-      if (id == null) {
-        param = { data: this.categoryIds }
-      } else {
-        param = { data: [id] }
-      }
-      this.axios.delete('/api/admin/categories', param).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listCategories()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-        this.isDelete = false
-      })
+      const param = id == null ? { data: this.categoryIds } : { data: [id] }
+      this.axios
+        .delete('/api/admin/categories', param)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listCategories()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+          this.isDelete = false
+        })
+        .catch(() => {})
     },
     listCategories() {
       this.axios
@@ -161,6 +156,9 @@ export default {
           this.count = data.data.count
           this.loading = false
         })
+        .catch(() => {
+          this.loading = false
+        })
     },
     openModel(category) {
       if (category != null) {
@@ -174,25 +172,28 @@ export default {
       this.addOrEdit = true
     },
     addOrEditCategory() {
-      if (this.categoryForm.categoryName.trim() == '') {
+      if (this.categoryForm.categoryName.trim() === '') {
         this.$message.error('分类名不能为空')
         return false
       }
-      this.axios.post('/api/admin/categories', this.categoryForm).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listCategories()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-        this.addOrEdit = false
-      })
+      this.axios
+        .post('/api/admin/categories', this.categoryForm)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listCategories()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+          this.addOrEdit = false
+        })
+        .catch(() => {})
     }
   }
 }

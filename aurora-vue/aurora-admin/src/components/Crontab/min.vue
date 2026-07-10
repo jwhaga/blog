@@ -61,17 +61,17 @@ export default {
       }
     },
     cycleChange() {
-      if (this.radioValue == '2') {
+      if (this.radioValue === '2') {
         this.$emit('update', 'min', this.cycleTotal, 'min')
       }
     },
     averageChange() {
-      if (this.radioValue == '3') {
+      if (this.radioValue === '3') {
         this.$emit('update', 'min', this.averageTotal, 'min')
       }
     },
     checkboxChange() {
-      if (this.radioValue == '4') {
+      if (this.radioValue === '4') {
         this.$emit('update', 'min', this.checkboxString, 'min')
       }
     }

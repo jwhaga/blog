@@ -6,7 +6,7 @@
         type="danger"
         size="small"
         icon="el-icon-delete"
-        :disabled="this.logIds.length == 0"
+        :disabled="this.logIds.length === 0"
         @click="isDelete = true">
         批量删除
       </el-button>
@@ -126,10 +126,7 @@ export default {
   },
   methods: {
     selectionChange(logs) {
-      this.logIds = []
-      logs.forEach((item) => {
-        this.logIds.push(item.id)
-      })
+      this.logIds = logs.map((item) => item.id)
     },
     searchLogs() {
       this.current = 1
@@ -159,29 +156,30 @@ export default {
           this.count = data.data.count
           this.loading = false
         })
+        .catch(() => {
+          this.loading = false
+        })
     },
     deleteLog(id) {
-      var param = {}
-      if (id != null) {
-        param = { data: [id] }
-      } else {
-        param = { data: this.logIds }
-      }
-      this.axios.delete('/api/admin/operation/logs', param).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listLogs()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-        this.isDelete = false
-      })
+      const param = id !== null ? { data: [id] } : { data: this.logIds }
+      this.axios
+        .delete('/api/admin/operation/logs', param)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listLogs()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+          this.isDelete = false
+        })
+        .catch(() => {})
     },
     check(optLog) {
       this.optLog = JSON.parse(JSON.stringify(optLog))

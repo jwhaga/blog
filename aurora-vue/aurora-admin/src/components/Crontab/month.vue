@@ -94,8 +94,8 @@ export default {
       return average01 + '/' + average02
     },
     checkboxString: function () {
-      let str = this.checkboxList.join()
-      return str == '' ? '*' : str
+      const str = this.checkboxList.join()
+      return str === '' ? '*' : str
     }
   }
 }

@@ -152,37 +152,38 @@ export default {
       this.listUsers()
     },
     changeDisable(user) {
-      this.axios.put('/api/admin/users/disable', {
-        id: user.userInfoId,
-        isDisable: user.isDisable
-      })
+      this.axios
+        .put('/api/admin/users/disable', {
+          id: user.userInfoId,
+          isDisable: user.isDisable
+        })
+        .catch(() => {})
     },
     openEditModel(user) {
-      this.roleIds = []
+      this.roleIds = user.roles.map((item) => item.id)
       this.userForm = JSON.parse(JSON.stringify(user))
-      this.userForm.roles.forEach((item) => {
-        this.roleIds.push(item.id)
-      })
       this.isEdit = true
     },
     editUserRole() {
       this.userForm.roleIds = this.roleIds
-      console.log(this.userForm)
-      this.axios.put('/api/admin/users/role', this.userForm).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listUsers()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-        this.isEdit = false
-      })
+      this.axios
+        .put('/api/admin/users/role', this.userForm)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listUsers()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+          this.isEdit = false
+        })
+        .catch(() => {})
     },
     listUsers() {
       this.axios
@@ -199,11 +200,17 @@ export default {
           this.count = data.data.count
           this.loading = false
         })
+        .catch(() => {
+          this.loading = false
+        })
     },
     listRoles() {
-      this.axios.get('/api/admin/users/role').then(({ data }) => {
-        this.userRoles = data.data
-      })
+      this.axios
+        .get('/api/admin/users/role')
+        .then(({ data }) => {
+          this.userRoles = data.data
+        })
+        .catch(() => {})
     }
   },
   watch: {

@@ -167,10 +167,7 @@ export default {
   },
   methods: {
     selectionChange(comments) {
-      this.commentIds = []
-      comments.forEach((item) => {
-        this.commentIds.push(item.id)
-      })
+      this.commentIds = comments.map((item) => item.id)
     },
     searchComments() {
       this.current = 1
@@ -190,50 +187,48 @@ export default {
       this.isReview = review
     },
     updateCommentReview(id) {
-      let param = {}
-      if (id != null) {
-        param.ids = [id]
-      } else {
-        param.ids = this.commentIds
+      const param = {
+        ids: id != null ? [id] : this.commentIds,
+        isReview: 1
       }
-      param.isReview = 1
-      this.axios.put('/api/admin/comments/review', param).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listComments()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-      })
+      this.axios
+        .put('/api/admin/comments/review', param)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listComments()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+        })
+        .catch(() => {})
     },
     deleteComments(id) {
-      var param = {}
-      if (id == null) {
-        param = { data: this.commentIds }
-      } else {
-        param = { data: [id] }
-      }
-      this.axios.delete('/api/admin/comments', param).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listComments()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-        this.remove = false
-      })
+      const param = id == null ? { data: this.commentIds } : { data: [id] }
+      this.axios
+        .delete('/api/admin/comments', param)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listComments()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+          this.remove = false
+        })
+        .catch(() => {})
     },
     listComments() {
       this.axios
@@ -249,6 +244,9 @@ export default {
         .then(({ data }) => {
           this.comments = data.data.records
           this.count = data.data.count
+          this.loading = false
+        })
+        .catch(() => {
           this.loading = false
         })
     }

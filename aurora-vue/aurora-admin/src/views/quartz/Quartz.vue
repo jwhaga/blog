@@ -42,7 +42,7 @@
           type="danger"
           size="small"
           icon="el-icon-delete"
-          :disabled="jobIds.length == 0"
+          :disabled="jobIds.length === 0"
           @click="isDelete = true">
           批量删除
         </el-button>
@@ -306,9 +306,12 @@ export default {
       this.listJobs()
     },
     listJobGroups() {
-      this.axios.get('/api/admin/jobs/jobGroups').then(({ data }) => {
-        this.jobGroups = data.data
-      })
+      this.axios
+        .get('/api/admin/jobs/jobGroups')
+        .then(({ data }) => {
+          this.jobGroups = data.data
+        })
+        .catch(() => {})
     },
     listJobs() {
       this.searchParams.current = this.current
@@ -322,16 +325,16 @@ export default {
           this.count = data.data.count
           this.loading = false
         })
+        .catch(() => {
+          this.loading = false
+        })
     },
     reset() {
       this.searchParams = {}
       this.listJobs()
     },
     selectionChange(jobs) {
-      this.jobIds = []
-      jobs.forEach((item) => {
-        this.jobIds.push(item.id)
-      })
+      this.jobIds = jobs.map((item) => item.id)
     },
     changeStatus(job) {
       this.axios
@@ -353,29 +356,28 @@ export default {
             })
           }
         })
+        .catch(() => {})
     },
     deleteJobs(id) {
-      let param = {}
-      if (id == null) {
-        param = { data: this.jobIds }
-      } else {
-        param = { data: [id] }
-      }
-      this.axios.delete('/api/admin/jobs', param).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: '删除成功'
-          })
-          this.listJobs()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: '删除失败'
-          })
-        }
-        this.isDelete = false
-      })
+      const param = id === null ? { data: this.jobIds } : { data: [id] }
+      this.axios
+        .delete('/api/admin/jobs', param)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: '删除成功'
+            })
+            this.listJobs()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: '删除失败'
+            })
+          }
+          this.isDelete = false
+        })
+        .catch(() => {})
     },
     handleShowCron() {
       this.expression = this.job.cronExpression
@@ -390,17 +392,28 @@ export default {
     handleChange(jobId) {
       this.editOrUpdate = true
       this.title = '编辑任务'
-      this.axios.get('/api/admin/jobs/' + jobId).then(({ data }) => {
-        this.job = data.data
-      })
+      this.axios
+        .get('/api/admin/jobs/' + jobId)
+        .then(({ data }) => {
+          this.job = data.data
+        })
+        .catch(() => {})
       this.dialogFormVisible = true
     },
     crontabFill(value) {
       this.job.cronExpression = value
     },
     handleEditOrUpdate() {
-      if (this.editOrUpdate === true) {
-        this.axios.put('/api/admin/jobs', this.job).then(({ data }) => {
+      if (this.editOrUpdate) {
+        this.updateJob()
+      } else {
+        this.addJob()
+      }
+    },
+    updateJob() {
+      this.axios
+        .put('/api/admin/jobs', this.job)
+        .then(({ data }) => {
           if (data.flag) {
             this.$notify.success({
               title: '修改成功',
@@ -415,8 +428,12 @@ export default {
           }
           this.dialogFormVisible = false
         })
-      } else if (this.editOrUpdate === false) {
-        this.axios.post('/api/admin/jobs', this.job).then(({ data }) => {
+        .catch(() => {})
+    },
+    addJob() {
+      this.axios
+        .post('/api/admin/jobs', this.job)
+        .then(({ data }) => {
           if (data.flag) {
             this.$notify.success({
               title: '添加成功',
@@ -431,7 +448,7 @@ export default {
           }
           this.dialogFormVisible = false
         })
-      }
+        .catch(() => {})
     },
     handleCommand(command, row) {
       switch (command) {
@@ -449,23 +466,26 @@ export default {
       }
     },
     handleRun(job) {
-      let params = {
+      const params = {
         id: job.id,
         jobGroup: job.jobGroup
       }
-      this.axios.put('/api/admin/jobs/run', params).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '执行成功',
-            message: data.message
-          })
-        } else {
-          this.$notify.error({
-            title: '执行失败',
-            message: data.message
-          })
-        }
-      })
+      this.axios
+        .put('/api/admin/jobs/run', params)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '执行成功',
+              message: data.message
+            })
+          } else {
+            this.$notify.error({
+              title: '执行失败',
+              message: data.message
+            })
+          }
+        })
+        .catch(() => {})
     },
     handleView(job) {
       this.openView = true

@@ -138,24 +138,23 @@ export default {
           break
       }
     },
-
     cycleChange() {
-      if (this.radioValue == '3') {
+      if (this.radioValue === '3') {
         this.$emit('update', 'week', this.cycleTotal)
       }
     },
     averageChange() {
-      if (this.radioValue == '4') {
+      if (this.radioValue === '4') {
         this.$emit('update', 'week', this.averageTotal)
       }
     },
     weekdayChange() {
-      if (this.radioValue == '5') {
+      if (this.radioValue === '5') {
         this.$emit('update', 'week', this.weekday + 'L')
       }
     },
     checkboxChange() {
-      if (this.radioValue == '6') {
+      if (this.radioValue === '6') {
         this.$emit('update', 'week', this.checkboxString)
       }
     }
@@ -183,8 +182,8 @@ export default {
       return this.weekday
     },
     checkboxString: function () {
-      let str = this.checkboxList.join()
-      return str == '' ? '*' : str
+      const str = this.checkboxList.join()
+      return str === '' ? '*' : str
     }
   }
 }

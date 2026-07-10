@@ -58,7 +58,6 @@ export default {
   props: ['check', 'cron'],
   methods: {
     radioChange() {
-      ;('day rachange')
       if (this.radioValue !== 2 && this.cron.week !== '?') {
         this.$emit('update', 'week', '?', 'day')
       }
@@ -85,25 +84,24 @@ export default {
           this.$emit('update', 'day', this.checkboxString)
           break
       }
-      ;('day rachange end')
     },
     cycleChange() {
-      if (this.radioValue == '3') {
+      if (this.radioValue === '3') {
         this.$emit('update', 'day', this.cycleTotal)
       }
     },
     averageChange() {
-      if (this.radioValue == '4') {
+      if (this.radioValue === '4') {
         this.$emit('update', 'day', this.averageTotal)
       }
     },
     workdayChange() {
-      if (this.radioValue == '5') {
+      if (this.radioValue === '5') {
         this.$emit('update', 'day', this.workdayCheck + 'W')
       }
     },
     checkboxChange() {
-      if (this.radioValue == '7') {
+      if (this.radioValue === '7') {
         this.$emit('update', 'day', this.checkboxString)
       }
     }
@@ -131,8 +129,8 @@ export default {
       return workday
     },
     checkboxString: function () {
-      let str = this.checkboxList.join()
-      return str == '' ? '*' : str
+      const str = this.checkboxList.join()
+      return str === '' ? '*' : str
     }
   }
 }

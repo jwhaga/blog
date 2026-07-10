@@ -76,9 +76,9 @@ export default {
   },
   methods: {
     handleCommand(command) {
-      var arr = command.split(',')
-      this.talkId = arr[1]
-      switch (arr[0]) {
+      const commandParts = command.split(',')
+      this.talkId = commandParts[1]
+      switch (commandParts[0]) {
         case '1':
           this.$router.push({ path: '/talks/' + this.talkId })
           break
@@ -105,6 +105,7 @@ export default {
           })
           this.count = data.data.count
         })
+        .catch(() => {})
     },
     sizeChange(size) {
       this.previews = []
@@ -124,27 +125,30 @@ export default {
       this.listTalks()
     },
     deleteTalk() {
-      this.axios.delete('/api/admin/talks', { data: [this.talkId] }).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listTalks()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-        this.isdelete = false
-      })
+      this.axios
+        .delete('/api/admin/talks', { data: [this.talkId] })
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listTalks()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+          this.isdelete = false
+        })
+        .catch(() => {})
     }
   },
   computed: {
     isActive() {
       return function (status) {
-        return this.status == status ? 'active-status' : 'status'
+        return this.status === status ? 'active-status' : 'status'
       }
     }
   }

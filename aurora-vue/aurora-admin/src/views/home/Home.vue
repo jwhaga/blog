@@ -209,9 +209,9 @@ export default {
       },
       userAreaMap: {
         tooltip: {
-          formatter: function (e) {
-            var value = e.value ? e.value : 0
-            return e.seriesName + '<br />' + e.name + '：' + value
+          formatter: function (params) {
+            const value = params.value ? params.value : 0
+            return params.seriesName + '<br />' + params.name + '：' + value
           }
         },
         visualMap: {
@@ -277,46 +277,64 @@ export default {
   },
   methods: {
     getData() {
-      this.axios.get('/api/admin').then(({ data }) => {
-        this.viewsCount = data.data.viewsCount
-        this.messageCount = data.data.messageCount
-        this.userCount = data.data.userCount
-        this.articleCount = data.data.articleCount
-        this.articleStatisticsDTOs = data.data.articleStatisticsDTOs
-        if (data.data.uniqueViewDTOs != null) {
-          data.data.uniqueViewDTOs.forEach((item) => {
-            this.viewCount.xAxis.data.push(item.day)
-            this.viewCount.series[0].data.push(item.viewsCount)
-          })
-        }
-
-        if (data.data.categoryDTOs != null) {
-          data.data.categoryDTOs.forEach((item) => {
-            this.category.series[0].data.push({
-              value: item.articleCount,
-              name: item.categoryName
-            })
-            this.category.legend.data.push(item.categoryName)
-          })
-        }
-
-        if (data.data.articleRankDTOs != null) {
-          data.data.articleRankDTOs.forEach((item) => {
-            this.ariticleRank.series[0].data.push(item.viewsCount)
-            this.ariticleRank.xAxis.data.push(item.articleTitle)
-          })
-        }
-
-        if (data.data.tagDTOs != null) {
-          data.data.tagDTOs.forEach((item) => {
-            this.tagDTOs.push({
-              id: item.id,
-              name: item.tagName
-            })
-          })
-        }
-
-        this.loading = false
+      this.axios
+        .get('/api/admin')
+        .then(({ data }) => {
+          const dashboardData = data.data
+          this.viewsCount = dashboardData.viewsCount
+          this.messageCount = dashboardData.messageCount
+          this.userCount = dashboardData.userCount
+          this.articleCount = dashboardData.articleCount
+          this.articleStatisticsDTOs = dashboardData.articleStatisticsDTOs
+          this.fillViewCountChart(dashboardData.uniqueViewDTOs)
+          this.fillCategoryChart(dashboardData.categoryDTOs)
+          this.fillArticleRankChart(dashboardData.articleRankDTOs)
+          this.fillTagCloud(dashboardData.tagDTOs)
+          this.loading = false
+        })
+        .catch(() => {
+          this.loading = false
+        })
+    },
+    fillViewCountChart(uniqueViewDTOs) {
+      if (uniqueViewDTOs == null) {
+        return
+      }
+      uniqueViewDTOs.forEach((item) => {
+        this.viewCount.xAxis.data.push(item.day)
+        this.viewCount.series[0].data.push(item.viewsCount)
+      })
+    },
+    fillCategoryChart(categoryDTOs) {
+      if (categoryDTOs == null) {
+        return
+      }
+      categoryDTOs.forEach((item) => {
+        this.category.series[0].data.push({
+          value: item.articleCount,
+          name: item.categoryName
+        })
+        this.category.legend.data.push(item.categoryName)
+      })
+    },
+    fillArticleRankChart(articleRankDTOs) {
+      if (articleRankDTOs == null) {
+        return
+      }
+      articleRankDTOs.forEach((item) => {
+        this.ariticleRank.series[0].data.push(item.viewsCount)
+        this.ariticleRank.xAxis.data.push(item.articleTitle)
+      })
+    },
+    fillTagCloud(tagDTOs) {
+      if (tagDTOs == null) {
+        return
+      }
+      tagDTOs.forEach((item) => {
+        this.tagDTOs.push({
+          id: item.id,
+          name: item.tagName
+        })
       })
     },
     listUserArea() {
@@ -329,6 +347,7 @@ export default {
         .then(({ data }) => {
           this.userAreaMap.series[0].data = data.data
         })
+        .catch(() => {})
     }
   },
   watch: {

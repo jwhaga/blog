@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <el-card class="main-card">
     <div class="title">{{ this.$route.name }}</div>
     <div class="article-title-container">
@@ -141,15 +141,23 @@
 
 <script>
 import * as imageConversion from 'image-conversion'
+
+const TOKEN_STORAGE_KEY = 'token'
+const ARTICLE_LIST_PATH = '/article-list'
+const STATUS_DRAFT = 3
+
 export default {
   created() {
     const path = this.$route.path
-    const arr = path.split('/')
-    const articleId = arr[2]
+    const pathSegments = path.split('/')
+    const articleId = pathSegments[2]
     if (articleId) {
-      this.axios.get('/api/admin/articles/' + articleId).then(({ data }) => {
-        this.article = data.data
-      })
+      this.axios
+        .get('/api/admin/articles/' + articleId)
+        .then(({ data }) => {
+          this.article = data.data
+        })
+        .catch(() => {})
     } else {
       const article = sessionStorage.getItem('article')
       if (article) {
@@ -194,27 +202,28 @@ export default {
         type: 1,
         status: 1
       },
-      headers: { Authorization: 'Bearer ' + sessionStorage.getItem('token') }
+      headers: { Authorization: 'Bearer ' + sessionStorage.getItem(TOKEN_STORAGE_KEY) }
     }
   },
   methods: {
     listCategories() {
-      this.axios.get('/api/admin/categories/search').then(({ data }) => {
-        this.categorys = data.data
-      })
+      this.axios
+        .get('/api/admin/categories/search')
+        .then(({ data }) => {
+          this.categorys = data.data
+        })
+        .catch(() => {})
     },
     listTags() {
-      this.axios.get('/api/admin/tags/search').then(({ data }) => {
-        this.tagList = data.data
-      })
+      this.axios
+        .get('/api/admin/tags/search')
+        .then(({ data }) => {
+          this.tagList = data.data
+        })
+        .catch(() => {})
     },
     openModel() {
-      if ((this.article.articleTitle || '').trim() == '') {
-        this.$message.error('文章标题不能为空')
-        return false
-      }
-      if ((this.article.articleContent || '').trim() == '') {
-        this.$message.error('文章内容不能为空')
+      if (!this.validateArticleBasic()) {
         return false
       }
       this.listCategories()
@@ -228,6 +237,7 @@ export default {
       return new Promise((resolve) => {
         if (file.size / 1024 < this.config.UPLOAD_SIZE) {
           resolve(file)
+          return
         }
         imageConversion.compressAccurately(file, this.config.UPLOAD_SIZE).then((res) => {
           resolve(res)
@@ -235,117 +245,139 @@ export default {
       })
     },
     uploadImg(pos, file) {
-      var formdata = new FormData()
+      const formData = new FormData()
       if (file.size / 1024 < this.config.UPLOAD_SIZE) {
-        formdata.append('file', file)
-        this.axios.post('/api/admin/articles/images', formdata).then(({ data }) => {
-          this.$refs.md.$img2Url(pos, data.data)
-        })
+        this.uploadImageFile(formData, file, pos)
       } else {
-        imageConversion.compressAccurately(file, this.config.UPLOAD_SIZE).then((res) => {
-          formdata.append('file', new window.File([res], file.name, { type: file.type }))
-          this.axios.post('/api/admin/articles/images', formdata).then(({ data }) => {
-            this.$refs.md.$img2Url(pos, data.data)
+        imageConversion
+          .compressAccurately(file, this.config.UPLOAD_SIZE)
+          .then((res) => {
+            const compressedFile = new window.File([res], file.name, { type: file.type })
+            this.uploadImageFile(formData, compressedFile, pos)
           })
-        })
+          .catch(() => {})
       }
     },
-    saveArticleDraft() {
-      if ((this.article.articleTitle || '').trim() == '') {
+    uploadImageFile(formData, file, pos) {
+      formData.append('file', file)
+      this.axios
+        .post('/api/admin/articles/images', formData)
+        .then(({ data }) => {
+          this.$refs.md.$img2Url(pos, data.data)
+        })
+        .catch(() => {})
+    },
+    validateArticleBasic() {
+      if ((this.article.articleTitle || '').trim() === '') {
         this.$message.error('文章标题不能为空')
         return false
       }
-      if ((this.article.articleContent || '').trim() == '') {
+      if ((this.article.articleContent || '').trim() === '') {
         this.$message.error('文章内容不能为空')
         return false
       }
-      this.article.status = 3
-      this.axios.post('/api/admin/articles', this.article).then(({ data }) => {
-        if (data.flag) {
-          if (this.article.id === null) {
-            this.$store.commit('removeTab', '发布文章')
+      return true
+    },
+    saveArticleDraft() {
+      if (!this.validateArticleBasic()) {
+        return false
+      }
+      this.article.status = STATUS_DRAFT
+      this.axios
+        .post('/api/admin/articles', this.article)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.removeArticleTab()
+            sessionStorage.removeItem('article')
+            this.$router.push({ path: ARTICLE_LIST_PATH })
+            this.$notify.success({
+              title: '成功',
+              message: '保存草稿成功'
+            })
           } else {
-            this.$store.commit('removeTab', '修改文章')
+            this.$notify.error({
+              title: '失败',
+              message: '保存草稿失败'
+            })
           }
-          sessionStorage.removeItem('article')
-          this.$router.push({ path: '/article-list' })
-          this.$notify.success({
-            title: '成功',
-            message: '保存草稿成功'
-          })
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: '保存草稿失败'
-          })
-        }
-      })
+        })
+        .catch(() => {})
       this.autoSave = false
     },
     saveOrUpdateArticle() {
-      if ((this.article.articleTitle || '').trim() == '') {
-        this.$message.error('文章标题不能为空')
+      if (!this.validateArticleForPublish()) {
         return false
       }
-      if ((this.article.articleContent || '').trim() == '') {
-        this.$message.error('文章内容不能为空')
+      this.axios
+        .post('/api/admin/articles', this.article)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.removeArticleTab()
+            sessionStorage.removeItem('article')
+            this.$router.push({ path: ARTICLE_LIST_PATH })
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+          this.addOrEdit = false
+        })
+        .catch(() => {})
+      this.autoSave = false
+    },
+    validateArticleForPublish() {
+      if (!this.validateArticleBasic()) {
         return false
       }
       if (this.article.categoryName == null) {
         this.$message.error('文章分类不能为空')
         return false
       }
-      if (this.article.tagNames.length == 0) {
+      if (this.article.tagNames.length === 0) {
         this.$message.error('文章标签不能为空')
         return false
       }
-      if ((this.article.articleCover || '').trim() == '') {
+      if ((this.article.articleCover || '').trim() === '') {
         this.$message.error('文章封面不能为空')
         return false
       }
-      this.axios.post('/api/admin/articles', this.article).then(({ data }) => {
-        if (data.flag) {
-          if (this.article.id === null) {
-            this.$store.commit('removeTab', '发布文章')
-          } else {
-            this.$store.commit('removeTab', '修改文章')
-          }
-          sessionStorage.removeItem('article')
-          this.$router.push({ path: '/article-list' })
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-        this.addOrEdit = false
-      })
-      this.autoSave = false
+      return true
+    },
+    removeArticleTab() {
+      if (this.article.id === null) {
+        this.$store.commit('removeTab', '发布文章')
+      } else {
+        this.$store.commit('removeTab', '修改文章')
+      }
     },
     autoSaveArticle() {
-      if (
-        this.autoSave &&
-        (this.article.articleTitle || '').trim() != '' &&
-        (this.article.articleContent || '').trim() != '' &&
-        this.article.id != null
-      ) {
-        this.axios.post('/api/admin/articles', this.article).then(({ data }) => {
-          if (data.flag) {
-            this.$notify.success({
-              title: '成功',
-              message: '自动保存成功'
-            })
-          } else {
-            this.$notify.error({
-              title: '失败',
-              message: '自动保存失败'
-            })
-          }
-        })
+      if (!this.autoSave) {
+        return
+      }
+      const hasContent =
+        (this.article.articleTitle || '').trim() !== '' && (this.article.articleContent || '').trim() !== ''
+      if (hasContent && this.article.id != null) {
+        this.axios
+          .post('/api/admin/articles', this.article)
+          .then(({ data }) => {
+            if (data.flag) {
+              this.$notify.success({
+                title: '成功',
+                message: '自动保存成功'
+              })
+            } else {
+              this.$notify.error({
+                title: '失败',
+                message: '自动保存失败'
+              })
+            }
+          })
+          .catch(() => {})
       }
       if (this.autoSave && this.article.id == null) {
         sessionStorage.setItem('article', JSON.stringify(this.article))
@@ -361,6 +393,9 @@ export default {
         .then(({ data }) => {
           cb(data.data)
         })
+        .catch(() => {
+          cb([])
+        })
     },
     handleSelectCategories(item) {
       this.addCategory({
@@ -368,7 +403,7 @@ export default {
       })
     },
     saveCategory() {
-      if (this.categoryName.trim() != '') {
+      if (this.categoryName.trim() !== '') {
         this.addCategory({
           categoryName: this.categoryName
         })
@@ -391,6 +426,9 @@ export default {
         .then(({ data }) => {
           cb(data.data)
         })
+        .catch(() => {
+          cb([])
+        })
     },
     handleSelectTag(item) {
       this.addTag({
@@ -398,7 +436,7 @@ export default {
       })
     },
     saveTag() {
-      if (this.tagName.trim() != '') {
+      if (this.tagName.trim() !== '') {
         this.addTag({
           tagName: this.tagName
         })
@@ -406,7 +444,7 @@ export default {
       }
     },
     addTag(item) {
-      if (this.article.tagNames.indexOf(item.tagName) == -1) {
+      if (this.article.tagNames.indexOf(item.tagName) === -1) {
         this.article.tagNames.push(item.tagName)
       }
     },
@@ -419,7 +457,7 @@ export default {
     tagClass() {
       return function (item) {
         const index = this.article.tagNames.indexOf(item.tagName)
-        return index != -1 ? 'tag-item-select' : 'tag-item'
+        return index !== -1 ? 'tag-item-select' : 'tag-item'
       }
     }
   }

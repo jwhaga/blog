@@ -107,10 +107,7 @@ export default {
   },
   methods: {
     selectionChange(tags) {
-      this.tagIds = []
-      tags.forEach((item) => {
-        this.tagIds.push(item.id)
-      })
+      this.tagIds = tags.map((item) => item.id)
     },
     searchTags() {
       this.current = 1
@@ -126,26 +123,24 @@ export default {
       this.listTags()
     },
     deleteTag(id) {
-      var param = {}
-      if (id == null) {
-        param = { data: this.tagIds }
-      } else {
-        param = { data: [id] }
-      }
-      this.axios.delete('/api/admin/tags', param).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listTags()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-      })
+      const param = id == null ? { data: this.tagIds } : { data: [id] }
+      this.axios
+        .delete('/api/admin/tags', param)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listTags()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+        })
+        .catch(() => {})
       this.isDelete = false
     },
     listTags() {
@@ -162,6 +157,9 @@ export default {
           this.count = data.data.count
           this.loading = false
         })
+        .catch(() => {
+          this.loading = false
+        })
     },
     openModel(tag) {
       if (tag != null) {
@@ -175,24 +173,27 @@ export default {
       this.addOrEdit = true
     },
     addOrEditTag() {
-      if (this.tagForm.tagName.trim() == '') {
+      if (this.tagForm.tagName.trim() === '') {
         this.$message.error('标签名不能为空')
         return false
       }
-      this.axios.post('/api/admin/tags', this.tagForm).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listTags()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-      })
+      this.axios
+        .post('/api/admin/tags', this.tagForm)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listTags()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+        })
+        .catch(() => {})
       this.addOrEdit = false
     }
   }

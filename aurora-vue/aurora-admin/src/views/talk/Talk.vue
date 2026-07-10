@@ -55,20 +55,27 @@
 <script>
 import * as imageConversion from 'image-conversion'
 import Editor from '@/components/Editor.vue'
+
+const TOKEN_STORAGE_KEY = 'token'
+const TALK_LIST_PATH = '/talk-list'
+
 export default {
   components: {
     Editor
   },
   created() {
     if (this.$route.params.talkId) {
-      this.axios.get('/api/admin/talks/' + this.$route.params.talkId).then(({ data }) => {
-        this.talk = data.data
-        if (data.data.imgs) {
-          data.data.imgs.forEach((item) => {
-            this.uploads.push({ url: item })
-          })
-        }
-      })
+      this.axios
+        .get('/api/admin/talks/' + this.$route.params.talkId)
+        .then(({ data }) => {
+          this.talk = data.data
+          if (data.data.imgs) {
+            data.data.imgs.forEach((item) => {
+              this.uploads.push({ url: item })
+            })
+          }
+        })
+        .catch(() => {})
     }
   },
   data: function () {
@@ -85,7 +92,7 @@ export default {
         { status: 2, desc: '私密' }
       ],
       uploads: [],
-      headers: { Authorization: 'Bearer ' + sessionStorage.getItem('token') }
+      headers: { Authorization: 'Bearer ' + sessionStorage.getItem(TOKEN_STORAGE_KEY) }
     }
   },
   methods: {
@@ -94,7 +101,7 @@ export default {
     },
     handleRemove(file) {
       this.uploads.forEach((item, index) => {
-        if (item.url == file.url) {
+        if (item.url === file.url) {
           this.uploads.splice(index, 1)
         }
       })
@@ -106,6 +113,7 @@ export default {
       return new Promise((resolve) => {
         if (file.size / 1024 < this.config.UPLOAD_SIZE) {
           resolve(file)
+          return
         }
         imageConversion.compressAccurately(file, this.config.UPLOAD_SIZE).then((res) => {
           resolve(res)
@@ -113,46 +121,43 @@ export default {
       })
     },
     saveOrUpdateTalk() {
-      if (this.talk.content.trim() == '') {
+      if (this.talk.content.trim() === '') {
         this.$message.error('说说内容不能为空')
         return false
       }
-      if (this.uploads.length > 0) {
-        var img = []
-        this.uploads.forEach((item) => {
-          img.push(item.url)
+      this.talk.images = this.buildImagesJson()
+      this.axios
+        .post('/api/admin/talks', this.talk)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$refs.editor.clear()
+            this.uploads = []
+            this.$router.push({ path: TALK_LIST_PATH })
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
         })
-        this.talk.images = JSON.stringify(img)
-      } else {
-        this.talk.images = ''
+        .catch(() => {})
+    },
+    buildImagesJson() {
+      if (this.uploads.length === 0) {
+        return ''
       }
-      this.axios.post('/api/admin/talks', this.talk).then(({ data }) => {
-        if (data.flag) {
-          this.$refs.editor.clear()
-          this.uploads = []
-          this.$router.push({ path: '/talk-list' })
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-      })
+      const imgUrls = this.uploads.map((item) => item.url)
+      return JSON.stringify(imgUrls)
     }
   },
   computed: {
     dropdownTitle() {
-      var desc = ''
-      this.statuses.forEach((item) => {
-        if (item.status == this.talk.status) {
-          desc = item.desc
-        }
-      })
-      return desc
+      const matched = this.statuses.find((item) => item.status === this.talk.status)
+      return matched ? matched.desc : ''
     }
   }
 }

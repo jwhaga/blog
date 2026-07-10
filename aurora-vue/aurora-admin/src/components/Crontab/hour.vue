@@ -61,17 +61,17 @@ export default {
       }
     },
     cycleChange() {
-      if (this.radioValue == '2') {
+      if (this.radioValue === '2') {
         this.$emit('update', 'hour', this.cycleTotal)
       }
     },
     averageChange() {
-      if (this.radioValue == '3') {
+      if (this.radioValue === '3') {
         this.$emit('update', 'hour', this.averageTotal)
       }
     },
     checkboxChange() {
-      if (this.radioValue == '4') {
+      if (this.radioValue === '4') {
         this.$emit('update', 'hour', this.checkboxString)
       }
     }
@@ -94,8 +94,8 @@ export default {
       return average01 + '/' + average02
     },
     checkboxString: function () {
-      let str = this.checkboxList.join()
-      return str == '' ? '*' : str
+      const str = this.checkboxList.join()
+      return str === '' ? '*' : str
     }
   }
 }

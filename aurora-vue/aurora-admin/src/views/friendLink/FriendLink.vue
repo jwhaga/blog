@@ -119,10 +119,7 @@ export default {
   },
   methods: {
     selectionChange(linkList) {
-      this.linkIdList = []
-      linkList.forEach((item) => {
-        this.linkIdList.push(item.id)
-      })
+      this.linkIdList = linkList.map((item) => item.id)
     },
     searchLinks() {
       this.current = 1
@@ -138,27 +135,25 @@ export default {
       this.listLinks()
     },
     deleteLink(id) {
-      var param = {}
-      if (id == null) {
-        param = { data: this.linkIdList }
-      } else {
-        param = { data: [id] }
-      }
-      this.axios.delete('/api/admin/links', param).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listLinks()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-        this.deleteFlag = false
-      })
+      const param = id == null ? { data: this.linkIdList } : { data: [id] }
+      this.axios
+        .delete('/api/admin/links', param)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listLinks()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+          this.deleteFlag = false
+        })
+        .catch(() => {})
     },
     openModel(link) {
       if (link != null) {
@@ -175,37 +170,46 @@ export default {
       this.addOrEdit = true
     },
     addOrEditCategory() {
-      if (this.linkForm.linkName.trim() == '') {
+      if (!this.validateLink()) {
+        return false
+      }
+      this.axios
+        .post('/api/admin/links', this.linkForm)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: data.message
+            })
+            this.listLinks()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+          this.addOrEdit = false
+        })
+        .catch(() => {})
+    },
+    validateLink() {
+      if (this.linkForm.linkName.trim() === '') {
         this.$message.error('友链名不能为空')
         return false
       }
-      if (this.linkForm.linkAvatar.trim() == '') {
+      if (this.linkForm.linkAvatar.trim() === '') {
         this.$message.error('友链头像不能为空')
         return false
       }
-      if (this.linkForm.linkIntro.trim() == '') {
+      if (this.linkForm.linkIntro.trim() === '') {
         this.$message.error('友链介绍不能为空')
         return false
       }
-      if (this.linkForm.linkAddress.trim() == '') {
+      if (this.linkForm.linkAddress.trim() === '') {
         this.$message.error('友链地址不能为空')
         return false
       }
-      this.axios.post('/api/admin/links', this.linkForm).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: data.message
-          })
-          this.listLinks()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-        this.addOrEdit = false
-      })
+      return true
     },
     listLinks() {
       this.axios
@@ -219,6 +223,9 @@ export default {
         .then(({ data }) => {
           this.linkList = data.data.records
           this.count = data.data.count
+          this.loading = false
+        })
+        .catch(() => {
           this.loading = false
         })
     }

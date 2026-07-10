@@ -57,6 +57,9 @@
 </template>
 
 <script>
+const MIN_PASSWORD_LENGTH = 6
+const TOKEN_STORAGE_KEY = 'token'
+
 export default {
   data: function () {
     return {
@@ -71,15 +74,18 @@ export default {
         confirmPassword: ''
       },
       activeName: 'info',
-      headers: { Authorization: 'Bearer ' + sessionStorage.getItem('token') }
+      headers: { Authorization: 'Bearer ' + sessionStorage.getItem(TOKEN_STORAGE_KEY) }
     }
   },
   methods: {
     handleClick(tab) {
-      if (tab.index == 2 && this.notice == '') {
-        this.axios.get('/api/admin/notice').then(({ data }) => {
-          this.notice = data.data
-        })
+      if (tab.index === '2' && this.notice === '') {
+        this.axios
+          .get('/api/admin/notice')
+          .then(({ data }) => {
+            this.notice = data.data
+          })
+          .catch(() => {})
       }
     },
     updateAvatar(response) {
@@ -91,58 +97,70 @@ export default {
       }
     },
     updateInfo() {
-      if (this.infoForm.nickname.trim() == '') {
+      if (this.infoForm.nickname.trim() === '') {
         this.$message.error('昵称不能为空')
         return false
       }
-      this.axios.put('/api/users/info', this.infoForm).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: '修改成功'
-          })
-          this.$store.commit('updateUserInfo', this.infoForm)
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: '修改失败'
-          })
-        }
-      })
+      this.axios
+        .put('/api/users/info', this.infoForm)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: '修改成功'
+            })
+            this.$store.commit('updateUserInfo', this.infoForm)
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: '修改失败'
+            })
+          }
+        })
+        .catch(() => {})
     },
     updatePassword() {
-      if (this.passwordForm.oldPassword.trim() == '') {
+      if (!this.validatePasswordForm()) {
+        return false
+      }
+      this.axios
+        .put('/api/admin/users/password', this.passwordForm)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.passwordForm.oldPassword = ''
+            this.passwordForm.newPassword = ''
+            this.passwordForm.confirmPassword = ''
+            this.$notify.success({
+              title: '成功',
+              message: '修改成功'
+            })
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: '修改失败'
+            })
+          }
+        })
+        .catch(() => {})
+    },
+    validatePasswordForm() {
+      if (this.passwordForm.oldPassword.trim() === '') {
         this.$message.error('旧密码不能为空')
         return false
       }
-      if (this.passwordForm.newPassword.trim() == '') {
+      if (this.passwordForm.newPassword.trim() === '') {
         this.$message.error('新密码不能为空')
         return false
       }
-      if (this.passwordForm.newPassword.length < 6) {
+      if (this.passwordForm.newPassword.length < MIN_PASSWORD_LENGTH) {
         this.$message.error('新密码不能少于6位')
         return false
       }
-      if (this.passwordForm.newPassword != this.passwordForm.confirmPassword) {
+      if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
         this.$message.error('两次密码输入不一致')
         return false
       }
-      this.axios.put('/api/admin/users/password', this.passwordForm).then(({ data }) => {
-        if (data.flag) {
-          this.passwordForm.oldPassword = ''
-          this.passwordForm.newPassword = ''
-          this.passwordForm.confirmPassword = ''
-          this.$notify.success({
-            title: '成功',
-            message: '修改成功'
-          })
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: '修改失败'
-          })
-        }
-      })
+      return true
     }
   },
   computed: {

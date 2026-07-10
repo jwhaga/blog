@@ -110,9 +110,9 @@ export default {
   methods: {
     resolveExp() {
       if (this.expression) {
-        let arr = this.expression.split(' ')
+        const arr = this.expression.split(' ')
         if (arr.length >= 6) {
-          let obj = {
+          const obj = {
             second: arr[0],
             min: arr[1],
             hour: arr[2],
@@ -124,7 +124,7 @@ export default {
           this.crontabValueObj = {
             ...obj
           }
-          for (let i in obj) {
+          for (const i in obj) {
             if (obj[i]) this.changeRadio(i, obj[i])
           }
         }
@@ -136,27 +136,26 @@ export default {
       this.tabActive = index
     },
     updateCrontabValue(name, value, from) {
-      'updateCrontabValue', name, value, from
       this.crontabValueObj[name] = value
       if (from && from !== name) {
         this.changeRadio(name, value)
       }
     },
     changeRadio(name, value) {
-      let arr = ['second', 'min', 'hour', 'month'],
-        refName = 'cron' + name,
-        insValue
+      const arr = ['second', 'min', 'hour', 'month']
+      const refName = 'cron' + name
+      let insValue
       if (!this.$refs[refName]) return
       if (arr.includes(name)) {
         if (value === '*') {
           insValue = 1
         } else if (value.indexOf('-') > -1) {
-          let indexArr = value.split('-')
+          const indexArr = value.split('-')
           isNaN(indexArr[0]) ? (this.$refs[refName].cycle01 = 0) : (this.$refs[refName].cycle01 = indexArr[0])
           this.$refs[refName].cycle02 = indexArr[1]
           insValue = 2
         } else if (value.indexOf('/') > -1) {
-          let indexArr = value.split('/')
+          const indexArr = value.split('/')
           isNaN(indexArr[0]) ? (this.$refs[refName].average01 = 0) : (this.$refs[refName].average01 = indexArr[0])
           this.$refs[refName].average02 = indexArr[1]
           insValue = 3
@@ -164,23 +163,23 @@ export default {
           insValue = 4
           this.$refs[refName].checkboxList = value.split(',')
         }
-      } else if (name == 'day') {
+      } else if (name === 'day') {
         if (value === '*') {
           insValue = 1
-        } else if (value == '?') {
+        } else if (value === '?') {
           insValue = 2
         } else if (value.indexOf('-') > -1) {
-          let indexArr = value.split('-')
+          const indexArr = value.split('-')
           isNaN(indexArr[0]) ? (this.$refs[refName].cycle01 = 0) : (this.$refs[refName].cycle01 = indexArr[0])
           this.$refs[refName].cycle02 = indexArr[1]
           insValue = 3
         } else if (value.indexOf('/') > -1) {
-          let indexArr = value.split('/')
+          const indexArr = value.split('/')
           isNaN(indexArr[0]) ? (this.$refs[refName].average01 = 0) : (this.$refs[refName].average01 = indexArr[0])
           this.$refs[refName].average02 = indexArr[1]
           insValue = 4
         } else if (value.indexOf('W') > -1) {
-          let indexArr = value.split('W')
+          const indexArr = value.split('W')
           isNaN(indexArr[0]) ? (this.$refs[refName].workday = 0) : (this.$refs[refName].workday = indexArr[0])
           insValue = 5
         } else if (value === 'L') {
@@ -189,33 +188,33 @@ export default {
           this.$refs[refName].checkboxList = value.split(',')
           insValue = 7
         }
-      } else if (name == 'week') {
+      } else if (name === 'week') {
         if (value === '*') {
           insValue = 1
-        } else if (value == '?') {
+        } else if (value === '?') {
           insValue = 2
         } else if (value.indexOf('-') > -1) {
-          let indexArr = value.split('-')
+          const indexArr = value.split('-')
           isNaN(indexArr[0]) ? (this.$refs[refName].cycle01 = 0) : (this.$refs[refName].cycle01 = indexArr[0])
           this.$refs[refName].cycle02 = indexArr[1]
           insValue = 3
         } else if (value.indexOf('#') > -1) {
-          let indexArr = value.split('#')
+          const indexArr = value.split('#')
           isNaN(indexArr[0]) ? (this.$refs[refName].average01 = 1) : (this.$refs[refName].average01 = indexArr[0])
           this.$refs[refName].average02 = indexArr[1]
           insValue = 4
         } else if (value.indexOf('L') > -1) {
-          let indexArr = value.split('L')
+          const indexArr = value.split('L')
           isNaN(indexArr[0]) ? (this.$refs[refName].weekday = 1) : (this.$refs[refName].weekday = indexArr[0])
           insValue = 5
         } else {
           this.$refs[refName].checkboxList = value.split(',')
           insValue = 7
         }
-      } else if (name == 'year') {
-        if (value == '') {
+      } else if (name === 'year') {
+        if (value === '') {
           insValue = 1
-        } else if (value == '*') {
+        } else if (value === '*') {
           insValue = 2
         } else if (value.indexOf('-') > -1) {
           insValue = 3
@@ -254,15 +253,15 @@ export default {
         week: '?',
         year: ''
       }
-      for (let j in this.crontabValueObj) {
+      for (const j in this.crontabValueObj) {
         this.changeRadio(j, this.crontabValueObj[j])
       }
     }
   },
   computed: {
     crontabValueString: function () {
-      let obj = this.crontabValueObj
-      let str =
+      const obj = this.crontabValueObj
+      const str =
         obj.second +
         ' ' +
         obj.min +
@@ -274,7 +273,7 @@ export default {
         obj.month +
         ' ' +
         obj.week +
-        (obj.year == '' ? '' : ' ' + obj.year)
+        (obj.year === '' ? '' : ' ' + obj.year)
       return str
     }
   },

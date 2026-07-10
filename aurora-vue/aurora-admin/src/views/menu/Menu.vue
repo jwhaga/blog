@@ -160,6 +160,9 @@ export default {
           this.menus = data.data
           this.loading = false
         })
+        .catch(() => {
+          this.loading = false
+        })
     },
     openModel(menu, type) {
       if (menu) {
@@ -205,72 +208,87 @@ export default {
       this.menuForm.icon = icon
     },
     changeDisable(menu) {
-      let params = {
+      const params = {
         id: menu.id,
         isHidden: menu.isHidden
       }
-      this.axios.put('/api/admin/menus/isHidden', params).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: '修改成功'
-          })
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: '修改失败'
-          })
-        }
-      })
+      this.axios
+        .put('/api/admin/menus/isHidden', params)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: '修改成功'
+            })
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: '修改失败'
+            })
+          }
+        })
+        .catch(() => {})
     },
     saveOrUpdateMenu() {
-      if (this.menuForm.name.trim() == '') {
+      if (!this.validateMenu()) {
+        return false
+      }
+      this.axios
+        .post('/api/admin/menus', this.menuForm)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: '操作成功'
+            })
+            this.listMenus()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: '操作失败'
+            })
+          }
+          this.addMenu = false
+        })
+        .catch(() => {})
+    },
+    validateMenu() {
+      if (this.menuForm.name.trim() === '') {
         this.$message.error('菜单名不能为空')
         return false
       }
-      if (this.menuForm.icon.trim() == '') {
+      if (this.menuForm.icon.trim() === '') {
         this.$message.error('菜单icon不能为空')
         return false
       }
-      if (this.menuForm.component.trim() == '') {
+      if (this.menuForm.component.trim() === '') {
         this.$message.error('菜单组件路径不能为空')
         return false
       }
-      if (this.menuForm.path.trim() == '') {
+      if (this.menuForm.path.trim() === '') {
         this.$message.error('菜单访问路径不能为空')
         return false
       }
-      this.axios.post('/api/admin/menus', this.menuForm).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: '操作成功'
-          })
-          this.listMenus()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: '操作失败'
-          })
-        }
-        this.addMenu = false
-      })
+      return true
     },
     deleteMenu(id) {
-      this.axios.delete('/api/admin/menus/' + id).then(({ data }) => {
-        if (data.flag) {
-          this.$notify.success({
-            title: '成功',
-            message: '删除成功'
-          })
-          this.listMenus()
-        } else {
-          this.$notify.error({
-            title: '失败',
-            message: data.message
-          })
-        }
-      })
+      this.axios
+        .delete('/api/admin/menus/' + id)
+        .then(({ data }) => {
+          if (data.flag) {
+            this.$notify.success({
+              title: '成功',
+              message: '删除成功'
+            })
+            this.listMenus()
+          } else {
+            this.$notify.error({
+              title: '失败',
+              message: data.message
+            })
+          }
+        })
+        .catch(() => {})
     }
   }
 }
