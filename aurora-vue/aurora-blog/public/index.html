@@ -4,14 +4,33 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!-- 强制https -->
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+
+    <!-- <%= BASE_URL %> 是 html-webpack-plugin 提供的模板语法 -->
     <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.8.3/katex.min.css" />
-    <script
+
+<!-- 数学表达式KaTeX  -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.8.3/katex.min.css" />
+     
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.8.3/katex.min.js"></script> --><!-- 刚发现太他妈老了-->
+     <!-- KaTeX 0.17.0 新版CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.css" 
+integrity="sha384-vlBdW0r3AcZO/HboRPznQNowvexd3fY8qHOWkBi5q7KGgqJ+F48+DceybYmrVbmB" 
+crossorigin="anonymous">
+
+<!-- KaTeX 核心JS，加defer不阻塞页面渲染 -->
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.js" 
+integrity="sha384-AtrdNsnxl/75rvBneBVH7DtOvCxSVahR2zWqle1coBKd8DEmLoviqNeJSx64gNAs" 
+crossorigin="anonymous"></script>
+     
+     <!--qq登陆  -->
+     <script
       src="http://connect.qq.com/qc_jssdk.js"
-      data-appid="101999415"
+      data-appid="1524036737"
       data-redirecturi="<%= htmlWebpackPlugin.options.qqRedirectUri %>"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.8.3/katex.min.js"></script>
+
+   
   </head>
   <body>
     <div id="app"></div>

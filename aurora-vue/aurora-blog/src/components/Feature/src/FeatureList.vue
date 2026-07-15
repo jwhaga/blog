@@ -4,6 +4,7 @@
       <div
         class="ob-gradient-plate opacity-90 relative z-10 bg-ob-deep-900 rounded-2xl flex justify-start items-end px-8 pb-10 shadow-md">
         <h2 class="text-3xl pb-8 lg:pb-16">
+          <!-- 导航栏 -->
           <p :style="gradientText">EDITOR'S SELECTION</p>
           <span class="relative text-2xl text-ob-bright font-semibold">
             <svg-icon class="inline-block" icon-class="hot" />
@@ -13,8 +14,9 @@
       </div>
       <span class="absolute top-0 w-full h-full z-0" :style="gradientBackground" />
     </div>
-
+<!-- 大屏 lg:grid-cols-2 一行 2 篇文章，移动端自动 1 列 -->
     <ul class="grid lg:grid-cols-2 gap-8">
+      <!-- 推荐文章卡片网格容器 -->
       <template v-if="featuredArticles.length > 0">
         <li v-for="article in featuredArticles" :key="article.id">
           <ArticleCard class="home-featured-article" :data="article" />

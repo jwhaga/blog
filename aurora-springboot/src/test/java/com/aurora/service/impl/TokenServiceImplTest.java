@@ -72,14 +72,13 @@ class TokenServiceImplTest {
         @Test
         @DisplayName("应能根据 UserDetailsDTO 创建 Token 并刷新 Redis")
         void shouldCreateTokenWhenGivenUserDetails() {
-            doReturn(true).when(redisService).hSet(eq(LOGIN_USER), eq(TEST_USER_ID.toString()), any(UserDetailsDTO.class), eq((long) EXPIRE_TIME));
+            doReturn(true).when(redisService).hSet(eq(LOGIN_USER), eq(TEST_USER_ID.toString()), any(UserDetailsDTO.class), eq((long) TOKEN_EXPIRE_SECONDS));
 
             String token = tokenService.createToken(userDetailsDTO);
 
             assertNotNull(token);
             assertFalse(token.isEmpty());
-            verify(redisService).hSet(eq(LOGIN_USER), eq(TEST_USER_ID.toString()), any(UserDetailsDTO.class), eq((long) EXPIRE_TIME));
-            // expireTime 应被设为当前时间 + EXPIRE_TIME
+            verify(redisService).hSet(eq(LOGIN_USER), eq(TEST_USER_ID.toString()), any(UserDetailsDTO.class), eq((long) TOKEN_EXPIRE_SECONDS));
             assertNotNull(userDetailsDTO.getExpireTime());
         }
     }
@@ -104,7 +103,7 @@ class TokenServiceImplTest {
         @Test
         @DisplayName("应能解析包含用户信息的 Token")
         void shouldParseTokenWhenGivenUserDetailsToken() {
-            doReturn(true).when(redisService).hSet(eq(LOGIN_USER), eq(TEST_USER_ID.toString()), any(UserDetailsDTO.class), eq((long) EXPIRE_TIME));
+            doReturn(true).when(redisService).hSet(eq(LOGIN_USER), eq(TEST_USER_ID.toString()), any(UserDetailsDTO.class), eq((long) TOKEN_EXPIRE_SECONDS));
             String token = tokenService.createToken(userDetailsDTO);
 
             Claims claims = tokenService.parseToken(token);
@@ -133,18 +132,18 @@ class TokenServiceImplTest {
         @Test
         @DisplayName("应设置 expireTime 并保存到 Redis")
         void shouldUpdateExpireTimeAndSaveToRedis() {
-            doReturn(true).when(redisService).hSet(eq(LOGIN_USER), eq(TEST_USER_ID.toString()), any(UserDetailsDTO.class), eq((long) EXPIRE_TIME));
+            doReturn(true).when(redisService).hSet(eq(LOGIN_USER), eq(TEST_USER_ID.toString()), any(UserDetailsDTO.class), eq((long) TOKEN_EXPIRE_SECONDS));
 
             tokenService.refreshToken(userDetailsDTO);
 
             assertNotNull(userDetailsDTO.getExpireTime());
-            verify(redisService).hSet(eq(LOGIN_USER), eq(TEST_USER_ID.toString()), any(UserDetailsDTO.class), eq((long) EXPIRE_TIME));
+            verify(redisService).hSet(eq(LOGIN_USER), eq(TEST_USER_ID.toString()), any(UserDetailsDTO.class), eq((long) TOKEN_EXPIRE_SECONDS));
         }
 
         @Test
         @DisplayName("expireTime 应在未来合理范围内")
         void shouldSetExpireTimeInFuture() {
-            doReturn(true).when(redisService).hSet(eq(LOGIN_USER), eq(TEST_USER_ID.toString()), any(UserDetailsDTO.class), eq((long) EXPIRE_TIME));
+            doReturn(true).when(redisService).hSet(eq(LOGIN_USER), eq(TEST_USER_ID.toString()), any(UserDetailsDTO.class), eq((long) TOKEN_EXPIRE_SECONDS));
 
             tokenService.refreshToken(userDetailsDTO);
 
@@ -158,18 +157,18 @@ class TokenServiceImplTest {
     class RenewToken {
 
         @Test
-        @DisplayName("距过期 <= TWENTY_MINUTES 时应刷新")
+        @DisplayName("距过期 <= CAPTCHA_EXPIRE_MINUTES 时应刷新")
         void shouldRefreshWhenWithinThreshold() {
             userDetailsDTO.setExpireTime(LocalDateTime.now().plusMinutes(TEN_MINUTES));
-            doReturn(true).when(redisService).hSet(eq(LOGIN_USER), eq(TEST_USER_ID.toString()), any(UserDetailsDTO.class), eq((long) EXPIRE_TIME));
+            doReturn(true).when(redisService).hSet(eq(LOGIN_USER), eq(TEST_USER_ID.toString()), any(UserDetailsDTO.class), eq((long) TOKEN_EXPIRE_SECONDS));
 
             tokenService.renewToken(userDetailsDTO);
 
-            verify(redisService).hSet(eq(LOGIN_USER), eq(TEST_USER_ID.toString()), any(UserDetailsDTO.class), eq((long) EXPIRE_TIME));
+            verify(redisService).hSet(eq(LOGIN_USER), eq(TEST_USER_ID.toString()), any(UserDetailsDTO.class), eq((long) TOKEN_EXPIRE_SECONDS));
         }
 
         @Test
-        @DisplayName("距过期 > TWENTY_MINUTES 时不刷新")
+        @DisplayName("距过期 > CAPTCHA_EXPIRE_MINUTES 时不刷新")
         void shouldNotRefreshWhenOutsideThreshold() {
             // 设置过期时间在 30 分钟后（超过 20 分钟阈值）
             userDetailsDTO.setExpireTime(LocalDateTime.now().plusMinutes(THIRTY_MINUTES));

@@ -4,6 +4,9 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 -- Table structure for t_about
 -- ----------------------------
+----------------------------
+--关于
+----------------------------
 DROP TABLE IF EXISTS `t_about`;
 CREATE TABLE `t_about`  (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -16,7 +19,7 @@ CREATE TABLE `t_about`  (
 -- ----------------------------
 -- Records of t_about
 -- ----------------------------
-INSERT INTO `t_about` VALUES (1, '{\"content\":\"this is about\"}', '2022-07-24 17:22:13', '2022-09-23 14:37:34');
+INSERT INTO `t_about` VALUES (1, '{\"content\":\"this is about\"}', '2026-07-8 17:22:13', '2026-07-9 14:37:34');
 
 -- ----------------------------
 -- Table structure for t_article
@@ -735,6 +738,10 @@ CREATE TABLE `t_user_auth`  (
 -- ----------------------------
 -- Records of t_user_auth
 -- ----------------------------
+
+-------------------------------
+--账号密码
+-------------------------------
 INSERT INTO `t_user_auth` VALUES (1, 1, 'admin@163.com', '$2a$10$/Z90STxVyGOIfNhTfvzbEuJ9t1yHjrkN6pBMRAqd5g5SdNIrdt5Da', 1, '182.118.236.146', '中国|河南省|洛阳市|联通', '2022-08-19 21:43:46', '2022-08-24 20:33:46', '2022-08-24 20:33:46');
 
 -- ----------------------------
@@ -758,6 +765,10 @@ CREATE TABLE `t_user_info`  (
 -- ----------------------------
 -- Records of t_user_info
 -- ----------------------------
+
+-------------------------------
+--用户信息
+------------------------------
 INSERT INTO `t_user_info` VALUES (1, 'admin@163.com', '演示账号', 'https://static.linhaojun.top/avatar/2af2e2db20740e712f0a011a6f8c9af5.jpg', '演示账号的用户简介', 'https://www.linhaojun.top', 0, 0, '2022-08-19 21:42:04', '2022-08-24 17:11:35');
 
 -- ----------------------------
@@ -791,6 +802,9 @@ CREATE TABLE `t_website_config`  (
 -- ----------------------------
 -- Records of t_website_config
 -- ----------------------------
+----------
+--头像
+----------------------
 INSERT INTO `t_website_config` VALUES (1, '{\"alipayQRCode\":\"https://static.linhaojun.top/config/da4c6d8c13f66a8dd6716ddb48d73299.jpg\",\"author\":\"花未眠\",\"authorAvatar\":\"https://static.linhaojun.top/config/6e4f47f4bb66d2d30722d20e789b220e.jpg\",\"authorIntro\":\"一个疯狂的coder\",\"beianNumber\":\"苏ICP备2022012376号\",\"csdn\":\"\",\"englishName\":\"huaweimian\",\"gitee\":\"https://gitee.com/linhaojun\",\"github\":\"https://github.com/linhaojun857\",\"isCommentReview\":0,\"isEmailNotice\":1,\"isReward\":1,\"juejin\":\"\",\"logo\":\"https://static.linhaojun.top/config/cc36e9fa5aeb214e41495c1e2268f2db.png\",\"multiLanguage\":1,\"name\":\"花未眠\",\"notice\":\"代码已经开源，如果你感觉还行就给一个star吧。。。\",\"qq\":\"\",\"qqLogin\":1,\"stackoverflow\":\"\",\"touristAvatar\":\"https://static.linhaojun.top/config/2af2e2db20740e712f0a011a6f8c9af5.jpg\",\"twitter\":\"\",\"userAvatar\":\"https://static.linhaojun.top/config/0af1901da1e64dfb99bb61db21e716c4.jpeg\",\"weChat\":\"\",\"websiteCreateTime\":\"2022-08-19\",\"weiXinQRCode\":\"https://static.linhaojun.top/config/ed47edae605f74306f751c6fba9f14bd.png\",\"weibo\":\"\",\"zhihu\":\"\"}', '2022-07-24 12:05:33', '2022-08-20 12:48:28');
 
 -- ----------------------------

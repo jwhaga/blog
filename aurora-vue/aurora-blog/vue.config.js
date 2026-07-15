@@ -10,7 +10,7 @@ module.exports = defineConfig({
   devServer: {
     proxy: {
       '/api': {
-         target: 'http://localhost:8081',
+         target: 'http://localhost:8089',
         changeOrigin: true,
         pathRewrite: {
           '^/api': ''
@@ -26,7 +26,7 @@ module.exports = defineConfig({
     }
   },
   chainWebpack: (config) => {
-    // ×¢Èë QQ »Øµ÷µØÖ·µ½ index.html£¬²¿ÊðÇ°ÐÞ¸Ä VUE_APP_QQ_REDIRECT_URI ¼´¿É
+    // ×¢ï¿½ï¿½ QQ ï¿½Øµï¿½ï¿½ï¿½Ö·ï¿½ï¿½ index.htmlï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½Þ¸ï¿½ VUE_APP_QQ_REDIRECT_URI ï¿½ï¿½ï¿½ï¿½
     config.plugin('html').tap(args => {
       args[0].qqRedirectUri = process.env.VUE_APP_QQ_REDIRECT_URI || 'http://localhost:8080/oauth/login/qq'
       return args
